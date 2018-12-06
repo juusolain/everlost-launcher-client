@@ -1,0 +1,28 @@
+{
+  "name": "everlost-client",
+  "version": "0.0.1",
+  "description": "Everlost launcher",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "author": "Porkposh",
+  "repository": "",
+  "license": "SEE LICENSE IN ../../EULA.txt",
+  "devDependencies": {
+    "electron": "^3.0.10",
+    "electron-builder": "^20.38.2"
+  },
+  "dependencies": {
+    "child_process": "^1.0.2"
+  },
+  "build": {
+    "appId": "everlost.launcher",
+    "mac": {
+      "category": "null"
+    }
+  }
+}

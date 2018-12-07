@@ -8,7 +8,7 @@ let win
 autoUpdater.checkForUpdatesAndNotify()
 
 function createWindow() {
-  win = new BrowserWindow({ width: 1440, height: 810, autoHideMenuBar: true, backgroundColor: "#2C2F33", show: false, resizable: false, frame: false, icon:'build/icon.png', webPreferences: {devTools: false}});
+  win = new BrowserWindow({ width: 1440, height: 810, autoHideMenuBar: true, backgroundColor: "#2C2F33", show: false, resizable: false, frame: false, icon:'build/icon.png', webPreferences: {devTools: true}});
 
   win.loadFile('static/index.html');
 

@@ -276,12 +276,8 @@ function updateGame(url, size, version){
   updatebar.style.display = "block";
   updating.innerHTML = "Updating to: "+version;
   let currentdl = download(url);
-  currentdl.pipe(fs.createWriteStream('Download/current.zip'));
   let lastProgress = null;
   currentdl.pipe(unzip.Extract({ path: 'Game/' }));
-  readstream.on('end', () => {
-
-  });
   currentdl.on('downloadProgress', (progress)=>{
     let progressPercent = progress.transferred / size * 100 + "%";
     let progressPercentDisplay = (progress.transferred / size * 100).toFixed(0) + "%";

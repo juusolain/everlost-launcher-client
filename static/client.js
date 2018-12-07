@@ -278,6 +278,10 @@ function updateGame(url, size, version){
   let currentdl = download(url);
   currentdl.pipe(fs.createWriteStream('Download/current.zip'));
   let lastProgress = null;
+  currentdl.pipe(unzip.Extract({ path: 'Game/' }));
+  readstream.on('end', () => {
+
+  });
   currentdl.on('downloadProgress', (progress)=>{
     let progressPercent = progress.transferred / size * 100 + "%";
     let progressPercentDisplay = (progress.transferred / size * 100).toFixed(0) + "%";
@@ -292,12 +296,8 @@ function updateGame(url, size, version){
     updatebar.style.display="none";
     loadingBar.style.display = "block";
     progressText.innerHTML = "Unpacking";
-    let readstream = fs.createReadStream('Download/current.zip');
-    readstream.pipe(unzip.Extract({ path: 'Game/' }));
-    readstream.on('end', () => {
-      console.log('update complete');
-      gameIsUpdated(true, version);
-    });
+    console.log('update complete');
+    gameIsUpdated(true, version);
   })
 }
 

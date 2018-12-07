@@ -12,6 +12,17 @@ body {
     to   { opacity: 1; }
 }
 
+@keyframes loader {
+  0% {
+    left: 0;
+    transform: translateX(-100%);
+  }
+  100% {
+    left: 100%;
+    transform: translateX(0%);
+  }
+}
+
 html {
   width: 100%;
   height: 100%;
@@ -30,24 +41,105 @@ html {
 
 .mainbox{
   animation: fadein 1s;
-  padding: 5% 5%;
-  width: 80%;
-  height: 70%;
-  top: 50%;
-  left: 50%;
-  position: absolute;
+  height: 100vh;
+  width: 100%;
+}
+
+#controlbox{
+  width: 35%;
+  height: 100vh;
+  padding: 0%;
+  float: right;
   background-color: #2C2F33;
-  transform: translate(-50%, -50%);
-  border-radius: 3px;
-  border-color: rgba(0,0,0,.1);
+}
+
+#launchupdate{
+  width: 30%;
+  height: auto;
+  bottom: 5%;
+  margin: 2% 0% 0% 2%;
+  position: absolute;
+}
+
+#additionalbox{
+  float: left;
+}
+
+#updatebar{
+  width: 0%;
+  background-color: #7289DA;
+  height: 8px;
+  margin: 8px;
+  display: none;
+}
+
+#loadingbar {
+  width: 100%;
+  margin: 8px;
+  height: 8px;
+  position: relative;
+  overflow: hidden;
+}
+#loadingbar::after {
+  content: '';
+  position: absolute;
+  height: 100%;
+  width: 25%;
+  background-color: #7289DA;
+  animation: loader 1.5s infinite linear;
+}
+
+#updatecheck{
   text-align: center;
-  color: #d3d3d3;
+  width: 100%;
+  float: left;
+  font-size: 20px;
+}
+
+#updateprogress{
+  text-align: center;
+  width: 100%;
+  float: left;
+  font-size: 14px;
+}
+
+#versioncontainer{
+  float: left;
+  position: absolute;
+  bottom: 0%;
+  right: 0%;
+  margin: 2px;
+}
+
+#version{
+  font-size: 12px;
+  margin: 0%;
+}
+
+#launchbutton
+{
+  padding: 3% 0.25%;
+}
+
+#updatebutton
+{
+  padding: 3% 0.25%;
+}
+
+#invalidaccount
+{
+  color: #d87070;
+  font-size: 14px;
+  text-align: left;
+  margin: 2% 0.5%;
+  padding: 0.1%;
 }
 
 .loginbox {
   animation: fadein 1s;
-  padding: 2% 5% 2%;
+  padding: 2.5% 5% 2.5%;
   width: 30%;
+  height: 25%;
   position: absolute;
   background-color: #2C2F33;
   left: 50%;
@@ -57,7 +149,7 @@ html {
   border-color: rgba(0,0,0,.1);
   margin-top: 5%;
   margin-bottom: 5%;
-  text-align: center;
+  text-align: left;
 }
 
 .inputbox {
@@ -82,7 +174,7 @@ html {
   width: 100%;
   left: 0%;
   margin: 1%;
-  padding: 1% 0.25%;
+  padding: 2% 0.25%;
   border-width: thin;
   border-radius: 3px;
   border-color: rgba(0,0,0,.1);
@@ -91,7 +183,7 @@ html {
   color: #d3d3d3;
   font-size: 20px;
   transition: background-color 0.25s;
-
+  text-align: center;
 }
 
 .button:hover{
@@ -133,24 +225,37 @@ a{
   font-size: 20px;
 }
 
+p{
+  color: #d3d3d3;
+  text-align: center;
+  font-size: 20px;
+}
+
 .titlebar{
   -webkit-app-region: no-drag;
-  background-color: rgba(255, 255, 255, 0.1);
-  height: 28px;
-  border-width: thin;
-  border-radius: 3px;
-  border-color: rgba(0,0,0,.1);
-  float: right;
-  width: 84px;
-}
-.titlebarbuttoncontainer {
-  height: 20px;
-  width: 20px;
-  margin: 4px;
   float: right;
 }
 
+
+.titlebarbuttoncontainer{
+  background-color: rgba(0,0,0,.1);
+  transition: background-color 0.25s;
+  padding: 4px;
+  margin: 4px;
+  float: right;
+  height: 28px;
+  width: 28px;
+}
+
 .titlebaricon{
-  height: 20px;
-  width: 20px;
+  padding: 0px;
+  margin: 0px;
+  float: right;
+  height: 28px;
+  width: 28px;
+}
+
+.titlebarbuttoncontainer:hover{
+  background-color: #7289DA;
+  cursor: pointer;
 }

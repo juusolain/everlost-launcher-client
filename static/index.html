@@ -8,12 +8,12 @@
   </head>
   <body>
     <div id="background">
-      <div id="customTitleBar" class="titlebar">
-        <div class="titlebarbuttoncontainer" onclick="quitPress()">
-          <img src="resources/icons/close.png" class="titlebaricon" onclick="quitPress()">
-        </div>
-      </div>
       <div id="loginscreen">
+        <div id="customTitleBar" class="titlebar">
+          <div class="titlebarbuttoncontainer" onclick="quitPress()">
+            <img src="resources/icons/close.png" class="titlebaricon" onclick="quitPress()">
+          </div>
+        </div>
         <div class="loginbox" id="loginbox">
           <input type="text" id="username_L" class="inputbox" placeholder="Username">
           <br>
@@ -24,6 +24,7 @@
           <div class="linkarea">
             <a onclick="setToRegister()" class="customlink" href="javascript:void(0);">Create a new account</a>
           </div>
+          <p id="invalidaccount" style="display: none">Username or password is incorrect, please try again</p>
         </div>
         <div class="loginbox" id="registerbox" style="display: none">
           <input type="text" id="email_R" class="inputbox" placeholder="Email">
@@ -41,9 +42,25 @@
       </div>
       <div id="mainscreen" style="display: none">
         <div class="mainbox">
-          <a>Still in progress</a>
-          <br>
-          <button onclick="launch()" class="button" value="Launch"><a>Launch</a></button>
+          <div id="controlbox">
+            <div id="customTitleBar" class="titlebar">
+              <div class="titlebarbuttoncontainer" onclick="quitPress()">
+                <img src="resources/icons/close.png" class="titlebaricon">
+              </div>
+            </div>
+            <div id="launchupdate">
+              <p id="updating" style="display: none">Updating to version</p>
+              <p id="updatecheck" style ="display: none">Checking for updates</p>
+              <div id="updatebar" style ="display: none"></div>
+              <div id="loadingbar" style="display: none"></div>
+              <p id="updateprogress" style="display: none">0%</p>
+              <button onclick="launch()" class="button" id="launchbutton" style="display: none" value="Launch"><a>Launch</a></button>
+              <button onclick="checkAndUpdateGame()" class="button" id="updatebutton" style="display: none" value="Update"><a>Update</a></button>
+            </div>
+            <div id="versioncontainer">
+              <p id="version"></p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

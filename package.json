@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "release": "build"
   },
   "author": "Porkposh",
   "repository": "https://github.com/jusola/everlost-launcher-client.git",
@@ -17,12 +18,34 @@
     "electron-builder": "^20.38.2"
   },
   "dependencies": {
-    "child_process": "^1.0.2"
+    "child_process": "^1.0.2",
+    "download": "^7.1.0",
+    "electron-dl": "^1.12.0",
+    "electron-updater": "^4.0.5",
+    "request": "^2.88.0",
+    "ssl-root-cas": "^1.2.5",
+    "unzip": "^0.1.11"
   },
   "build": {
     "appId": "everlost.launcher",
     "mac": {
       "category": "null"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis"
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": "false",
+      "installerIcon": "build/icon.ico"
     }
+  },
+  "win": {
+    "publish": [
+      "github"
+    ]
   }
 }

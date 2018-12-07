@@ -40,6 +40,12 @@
     },
     "nsis": {
       "oneClick": "false",
+      "allowToChangeInstallationDirectory": "true",
+      "installerIcon": "build/icon.ico"
+    },
+    "nsisWeb": {
+      "allowToChangeInstallationDirectory": "true",
+      "oneClick": "false",
       "installerIcon": "build/icon.ico"
     }
   },

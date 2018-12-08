@@ -1,6 +1,6 @@
 {
   "name": "everlost-client",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Everlost launcher",
   "main": "index.js",
   "scripts": {

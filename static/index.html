@@ -27,9 +27,9 @@
           <p id="invalidaccount" style="display: none">Username or password is incorrect, please try again</p>
         </div>
         <div class="loginbox" id="registerbox" style="display: none">
-          <input type="text" id="email_R" class="inputbox" placeholder="Email">
-          <br>
           <input type="text" id="username_R" class="inputbox" placeholder="Username">
+          <br>
+          <input type="text" id="email_R" class="inputbox" placeholder="Email">
           <br>
           <input type="password" id="password_R" class="inputbox" placeholder="Password">
           <br>
@@ -43,6 +43,17 @@
       <div id="mainscreen" style="display: none">
         <div class="mainbox">
           <div id="controlbox">
+            <div id="profile">
+              <div id="usernameiconcontainer">
+                <div id="usericondisplaycontainer">
+                  <img id="currentusericon"></img>
+                </div>
+                <div id="usernamedisplaycontainer">
+                  <p id="usernamedisplay"></p>
+                </div>
+              </div>
+              <button onclick="logout()" id="logoutbutton" class="button"><a>Logout</a></button>
+            </div>
             <div id="customTitleBar" class="titlebar">
               <div class="titlebarbuttoncontainer" onclick="quitPress()">
                 <img src="resources/icons/close.png" class="titlebaricon">
@@ -55,7 +66,7 @@
               <div id="loadingbar" style="display: none"></div>
               <p id="updateprogress" style="display: none">0%</p>
               <button onclick="launch()" class="button" id="launchbutton" style="display: none" value="Launch"><a>Launch</a></button>
-              <button onclick="checkAndUpdateGame()" class="button" id="updatebutton" style="display: none" value="Update"><a>Update</a></button>
+              <button onclick="updatePressed()" class="button" id="updatebutton" style="display: none" value="Update"><a>Update</a></button>
             </div>
             <div id="versioncontainer">
               <p id="version"></p>

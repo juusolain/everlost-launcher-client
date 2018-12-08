@@ -7,6 +7,7 @@ https.globalAgent.options.ca = require('ssl-root-cas/latest').create();
 const serverUrl = "https://everlost.jusola.cf/";
 const updateFile = "";
 var token = null;
+var currentUserName;
 const download = require('download');
 const fs = require('fs');
 const unzip = require('unzip');
@@ -21,6 +22,11 @@ function setToRegister(){
   var registerDiv = document.getElementById("registerbox");
   var loginDiv = document.getElementById("loginbox");
   var mainscreen = document.getElementById("mainscreen");
+  var loginscreen = document.getElementById("loginscreen");
+  document.getElementById("username_R").value = document.getElementById("username_L").value;
+  document.getElementById("email_R").value = null;
+  document.getElementById("password_R").value = null;
+  loginscreen.style.display = "block";
   mainscreen.style.display = "none";
   registerDiv.style.display = "block";
   loginDiv.style.display = "none";
@@ -30,6 +36,10 @@ function setToLogin(){
   var registerDiv = document.getElementById("registerbox");
   var loginDiv = document.getElementById("loginbox");
   var mainscreen = document.getElementById("mainscreen");
+  var loginscreen = document.getElementById("loginscreen");
+  document.getElementById("username_L").value = document.getElementById("username_R").value;
+  document.getElementById("password_L").value = null;
+  loginscreen.style.display = "block";
   mainscreen.style.display = "none";
   registerDiv.style.display = "none";
   loginDiv.style.display = "block";
@@ -55,6 +65,36 @@ function registerAccount(){
   })
 }
 
+function getUserdata(cb){
+  request.get({url: serverUrl+"getuser", form: {token: token}}, (err,httpResponse,body)=>{
+    if(!err){
+      let elembody = JSON.parse(body);
+      if(!elembody.error){
+        currentUserName = elembody.username;
+        cb(true);
+      }else{
+        console.log(elembody.error);
+        cb(false);
+      }
+    }
+  })
+}
+
+function getUserIcon(usernameToGet, cb){
+  request.get({url: serverUrl+"getusericon", form: {username: usernameToGet}, encoding: null}, (err,httpResponse,body)=>{
+    if(!err && body){
+      fs.writeFile(__dirname+"/../cache/icon/"+usernameToGet+".png", body, (err)=>{
+        if(!err){
+          cb(true, __dirname+"/../cache/icon/"+usernameToGet+".png");
+        }else{
+          cb(false);
+          console.log(err);
+        }
+      })
+    }
+  })
+}
+
 function login(){
   var login = document.getElementById("username_L").value;
   var invalidacc = document.getElementById("invalidaccount");
@@ -63,10 +103,11 @@ function login(){
   request.get({url: serverUrl+"login", form: {login: login, password: encryptedPW}}, (err,httpResponse,body)=>{
     if(!err){
       let elembody = JSON.parse(body);
+      console.log(elembody);
       if(!elembody.error){
           invalidacc.style.display = "none";
-          setToMain();
           token = elembody.token;
+          setToMain();
       }else if(elembody.error == "NOACCOUNT"){
         console.log("noaccount");
         invalidacc.style.display = "block";
@@ -81,21 +122,44 @@ function login(){
   })
 }
 
+function logout(){
+  token = null;
+  currentUserName = null;
+  setToLogin();
+}
+
 function setToMain(){
-  var versionDisplay = document.getElementById("version");
-  fs.readFile(__dirname+'/../Game/version.txt', 'utf8', (fileErr, data) => {
-    if(!fileErr){
-      versionDisplay.innerHTML = data;
+  getUserdata((success)=>{
+    if(success){
+      var versionDisplay = document.getElementById("version");
+      fs.readFile(__dirname+'/../Game/version.txt', 'utf8', (fileErr, data) => {
+        if(!fileErr){
+          versionDisplay.textContent = data;
+        }
+      });
+      var loginscreen = document.getElementById("loginscreen");
+      var mainscreen = document.getElementById("mainscreen");
+      var usernamedisplay = document.getElementById("usernamedisplay");
+      var usericondisplay = document.getElementById("currentusericon");
+      usernamedisplay.textContent = currentUserName;
+      loginscreen.style.display = "none";
+      mainscreen.style.display = "block";
+      setInterval(()=>{
+        checkUpdates();
+      }, 60000);
+      checkUpdates();
+      getUserIcon(currentUserName, (done, loc)=>{
+        if(done){
+          currentusericon.src=loc;
+        }else{
+          console.log("NOTDONE");
+        }
+      })
+    }else{
+      setToLogin();
     }
   });
-  var loginscreen = document.getElementById("loginscreen");
-  var mainscreen = document.getElementById("mainscreen");
-  loginscreen.style.display = "none";
-  mainscreen.style.display = "block";
-  setInterval(()=>{
-    checkUpdates();
-  }, 600000);
-  checkUpdates();
+
 }
 
 function quitPress(){
@@ -171,7 +235,8 @@ function checkUpdates(){
                   return false;
                 }
             });
-            if((currentVersion < parseFloat(parsedBody[0].tag_name.replace(/[^0-9]/gi, ''))) || fileErr){
+            console.log(parsedBody);
+            if((currentVersion != parseFloat(parsedBody[0].tag_name.replace(/[^0-9]/gi, ''))) || fileErr){
               console.log('Updating to version: '+parsedBody[0].tag_name);
               setToUpdate(parsedBody[0].tag_name);
             }else{
@@ -205,7 +270,7 @@ function setToUpdate(version){
   launchbutton.style.display = "none";
   loadingBar.style.display = "none";
   updatebutton.style.display = "block";
-  updating.innerHTML = "Update available: "+version;
+  updating.textContent = "Update available: "+version;
 }
 
 function getUpdateURL(cb){
@@ -271,7 +336,8 @@ function getUpdateURL(cb){
                   return false;
                 }
             });
-            if((currentVersion < parseFloat(parsedBody[0].tag_name.replace(/[^0-9]/gi, ''))) || fileErr){
+            console.log(parsedBody);
+            if((currentVersion != parseFloat(parsedBody[0].tag_name.replace(/[^0-9]/gi, ''))) || fileErr){
               console.log('Updating to version: '+parsedBody[0].tag_name);
 
               cb(true, parsedBody2[0].browser_download_url, parsedBody2[0].size, parsedBody[0].tag_name);
@@ -295,7 +361,7 @@ function getUpdateURL(cb){
 function updatePressed(){
   getUpdateURL((isAvail, url, size, toVersion)=>{
     if(isAvail){
-      updateGame(url,size,version);
+      updateGame(url,size, toVersion);
     }
   });
 }
@@ -313,7 +379,8 @@ function updateGame(url, size, version){
   loadingBar.style.display = "none";
   progressText.style.display = "block";
   updatebar.style.display = "block";
-  updating.innerHTML = "Updating to: "+version;
+  console.log(version);
+  updating.textContent = "Updating to: "+version;
   let currentdl = download(url);
   let lastProgress = null;
   currentdl.pipe(unzip.Extract({ path: 'Game/' }));
@@ -323,14 +390,14 @@ function updateGame(url, size, version){
     updatebar.style.width = progressPercent;
     if (lastProgress != progressPercentDisplay) {
       console.log(progressPercentDisplay);
-      progressText.innerHTML = "Downloading: "+progressPercentDisplay;
+      progressText.textContent = "Downloading: "+progressPercentDisplay;
     }
     lastProgress = progressPercentDisplay;
   })
   currentdl.on('end', ()=>{
     updatebar.style.display="none";
     loadingBar.style.display = "block";
-    progressText.innerHTML = "Unpacking";
+    progressText.textContent = "Unpacking";
     console.log('update complete');
     gameIsUpdated(true, version);
   })
@@ -344,6 +411,10 @@ function gameIsUpdated(bUpdated, version){
   var updating = document.getElementById("updating");
   var loadingBar = document.getElementById("loadingbar");
   var updatebutton= document.getElementById("updatebutton");
+  var versionDisplay = document.getElementById("version");
+  if(bUpdated){
+    versionDisplay.textContent = version;
+  }
   updatebutton.style.display = "none";
   updating.style.display = "none";
   progress.style.display = "none";

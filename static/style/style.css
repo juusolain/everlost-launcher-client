@@ -57,8 +57,62 @@ html {
   width: 30%;
   height: auto;
   bottom: 5%;
+  margin: 0% 0% 2% 2%;
+  position: absolute;
+}
+
+#profile{
+  width: 30%;
+  height: auto;
+  top: 2%;
   margin: 2% 0% 0% 2%;
   position: absolute;
+  text-align: left;
+  font-size: 24px;
+}
+
+#profile p{
+  width: 25%;
+  text-align: left;
+  margin: 0%;
+  font-size: 32px;
+}
+
+#usericondisplaycontainer{
+  width: 48px;
+  height: 48px;
+  float: left;
+  margin: 0% 2% 0% 0%;
+}
+
+#usernamedisplaycontainer{
+  margin: 0% 1% 0% 1%;
+  height: 48px;
+}
+
+#usernameiconcontainer{
+  clear: left;
+  height: 48px;
+  margin: 2%;
+}
+
+#currentusericon{
+  width: 48px;
+  height: 48px;
+}
+
+#usernamedisplay{
+  height: 48px;
+  padding-top: 4px;
+}
+
+#logoutbutton{
+  width: 50%;
+  height: auto;
+  font-size: 14px;
+  float: left;
+  margin: 2%;
+  padding: 1% 0.25%;
 }
 
 #additionalbox{

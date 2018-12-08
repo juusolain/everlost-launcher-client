@@ -1,5 +1,5 @@
 const {ipcRenderer} = require('electron');
-const spawn = require('child_process').spawn;
+const {spawn, execFile} = require('child_process');
 const request = require('request');
 const https = require('https');
 var CryptoJS = require("crypto-js");
@@ -168,7 +168,8 @@ function quitPress(){
 }
 
 function launch(){
-  const game = spawn("", ["172.23.189.179", "-username="+currentUserName, "-token="+token], {detached: true});
+  const game = execFile(__dirname+"/../Game/Everlost.exe", ["172.23.189.179", "-username="+currentUserName, "-token="+token], {detached: true});
+  toggleLaunch(false);
   game.on("close", ()=>{
     toggleLaunch(true);
   });

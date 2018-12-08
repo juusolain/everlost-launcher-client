@@ -2,8 +2,9 @@ const {ipcRenderer} = require('electron');
 const spawn = require('child_process').spawn;
 const request = require('request');
 const https = require('https');
+var CryptoJS = require("crypto-js");
 https.globalAgent.options.ca = require('ssl-root-cas/latest').create();
-const serverUrl = "http://everlost.jusola.cf/";
+const serverUrl = "https://everlost.jusola.cf/";
 const updateFile = "";
 var token = null;
 const download = require('download');
@@ -38,7 +39,8 @@ function registerAccount(){
   var username = document.getElementById("username_R").value;
   var email = document.getElementById("email_R").value;
   var password = document.getElementById("password_R").value;
-  request.get({url: serverUrl+"register", form: {username: username, password: password, email: email}}, (err,httpResponse,body)=>{
+  var encryptedPW = CryptoJS.SHA256(password).toString();
+  request.get({url: serverUrl+"register", form: {username: username, password: encryptedPW, email: email}}, (err,httpResponse,body)=>{
     if(!err){
       let elembody = JSON.parse(body);
       if(!elembody.error){
@@ -57,7 +59,8 @@ function login(){
   var login = document.getElementById("username_L").value;
   var invalidacc = document.getElementById("invalidaccount");
   var password = document.getElementById("password_L").value;
-  request.get({url: serverUrl+"login", form: {login: login, password: password}}, (err,httpResponse,body)=>{
+  var encryptedPW = CryptoJS.SHA256(password).toString();
+  request.get({url: serverUrl+"login", form: {login: login, password: encryptedPW}}, (err,httpResponse,body)=>{
     if(!err){
       let elembody = JSON.parse(body);
       if(!elembody.error){
@@ -106,36 +109,20 @@ function launch(){
 }
 
 function checkUpdates(){
-  var launchbutton = document.getElementById("launchbutton");
-  var updatecheck = document.getElementById("updatecheck");
-  var updatebar = document.getElementById("updatebar");
-  var progress = document.getElementById("updateprogress");
-  var updating = document.getElementById("updating");
-  var loadingBar = document.getElementById("loadingbar");
-  var updatebutton= document.getElementById("updatebutton");
-  updatebutton.style.display = "none";
-  updating.style.display = "none";
-  progress.style.display = "none";
-  updatebar.style.display = "none";
-  updatecheck.style.display = "block";
-  launchbutton.style.display = "none";
-  loadingBar.style.display = "none";
-  var updatecheck = document.getElementById("updatecheck");
-  updatecheck.style.display = "block";
   let currentVersion = null;
+  let fullDL = true;
   fs.readFile(__dirname+'/../Game/version.txt', 'utf8', (fileErr, data) => {
     if(!fileErr){
       currentVersion = parseFloat(data.replace(/[^0-9]/gi, ''));
     }else{
       currentVersion = -1;
     }
-
     request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases", (err, httpResponse, body)=>{
       if(!err){
         let parsedBody = JSON.parse(body);
         parsedBody = parsedBody.filter((elem)=>{
           if(clientConfig.preRelease){
-            if(elem.target_commitish == "pre-release"){
+            if(elem.target_commitish == "pre-release" || elem.target_commitish == "release"){
               return true;
             }else{
               return false;
@@ -151,19 +138,41 @@ function checkUpdates(){
         parsedBody = parsedBody.sort((a, b)=>{
           let aTag = a.tag_name;
           let bTag = b.tag_name;
-          aTag.replace(/[^0-9]/gi, '');
-          bTag.replace(/[^0-9]/gi, '');
+          aTag = aTag.replace(/[^0-9]/gi, '');
+          bTag = bTag.replace(/[^0-9]/gi, '');
           return parseFloat(a)-parseFloat(b);
         })
+        if (parsedBody.length > 1){
+          let versionBefore = parsedBody[1].tag_name.replace(/[^0-9]/gi, '')
+          if(versionBefore == currentVersion){
+            fullDL = false;
+          }
+        }
         request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases/"+parsedBody[0].id+"/assets", (err, httpR, body)=>{
           if(!err && body){
             let parsedBody2 = JSON.parse(body);
             parsedBody2 = parsedBody2.filter((elem)=>{
                 if(elem.name.includes(clientConfig.platform)){
+                  if(!fullDL){
+                    if(elem.name.includes(clientConfig.platform) && elem.name.toLowerCase().includes("update")){
+                      return true;
+                    }else{
+                      return false;
+                    }
+                  }else{
+                    if(!elem.name.toLowerCase().includes("update")){
+                      return true;
+                    }else{
+                      return false;
+                    }
+                  }
                   return true;
+                }else{
+                  return false;
                 }
             });
             if((currentVersion < parseFloat(parsedBody[0].tag_name.replace(/[^0-9]/gi, ''))) || fileErr){
+              console.log('Updating to version: '+parsedBody[0].tag_name);
               setToUpdate(parsedBody[0].tag_name);
             }else{
               gameIsUpdated(false);
@@ -178,6 +187,7 @@ function checkUpdates(){
       }
     })
   });
+
 }
 
 function setToUpdate(version){
@@ -198,8 +208,9 @@ function setToUpdate(version){
   updating.innerHTML = "Update available: "+version;
 }
 
-function checkAndUpdateGame(){
+function getUpdateURL(cb){
   let currentVersion = null;
+  let fullDL = true;
   fs.readFile(__dirname+'/../Game/version.txt', 'utf8', (fileErr, data) => {
     if(!fileErr){
       currentVersion = parseFloat(data.replace(/[^0-9]/gi, ''));
@@ -211,7 +222,7 @@ function checkAndUpdateGame(){
         let parsedBody = JSON.parse(body);
         parsedBody = parsedBody.filter((elem)=>{
           if(clientConfig.preRelease){
-            if(elem.target_commitish == "pre-release"){
+            if(elem.target_commitish == "pre-release" || elem.target_commitish == "release"){
               return true;
             }else{
               return false;
@@ -227,15 +238,34 @@ function checkAndUpdateGame(){
         parsedBody = parsedBody.sort((a, b)=>{
           let aTag = a.tag_name;
           let bTag = b.tag_name;
-          aTag.replace(/[^0-9]/gi, '');
-          bTag.replace(/[^0-9]/gi, '');
+          aTag = aTag.replace(/[^0-9]/gi, '');
+          bTag = bTag.replace(/[^0-9]/gi, '');
           return parseFloat(a)-parseFloat(b);
         })
+        if (parsedBody.length > 1){
+          let versionBefore = parsedBody[1].tag_name.replace(/[^0-9]/gi, '')
+          if(versionBefore == currentVersion){
+            fullDL = false;
+          }
+        }
         request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases/"+parsedBody[0].id+"/assets", (err, httpR, body)=>{
           if(!err && body){
             let parsedBody2 = JSON.parse(body);
             parsedBody2 = parsedBody2.filter((elem)=>{
                 if(elem.name.includes(clientConfig.platform)){
+                  if(!fullDL){
+                    if(elem.name.includes(clientConfig.platform) && elem.name.toLowerCase().includes("update")){
+                      return true;
+                    }else{
+                      return false;
+                    }
+                  }else{
+                    if(!elem.name.toLowerCase().includes("update")){
+                      return true;
+                    }else{
+                      return false;
+                    }
+                  }
                   return true;
                 }else{
                   return false;
@@ -244,9 +274,9 @@ function checkAndUpdateGame(){
             if((currentVersion < parseFloat(parsedBody[0].tag_name.replace(/[^0-9]/gi, ''))) || fileErr){
               console.log('Updating to version: '+parsedBody[0].tag_name);
 
-              updateGame(parsedBody2[0].browser_download_url, parsedBody2[0].size, parsedBody[0].tag_name);
+              cb(true, parsedBody2[0].browser_download_url, parsedBody2[0].size, parsedBody[0].tag_name);
             }else{
-              gameIsUpdated(false);
+              cb(false);
             }
 
           }else{
@@ -259,6 +289,15 @@ function checkAndUpdateGame(){
     })
   });
 
+}
+
+
+function updatePressed(){
+  getUpdateURL((isAvail, url, size, toVersion)=>{
+    if(isAvail){
+      updateGame(url,size,version);
+    }
+  });
 }
 
 function updateGame(url, size, version){

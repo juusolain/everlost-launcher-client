@@ -168,8 +168,22 @@ function quitPress(){
 }
 
 function launch(){
-  const process = spawn("E:/EpicGames/UE_4.21/Engine/Binaries/Win64/UE4Editor.exe", [__dirname+"/../Game/Everlost.uproject", "-game", "-log", "-nosteam"], {detached: true});
-  process.unref();
+  const game = spawn("", ["172.23.189.179", "-username="+currentUserName, "-token="+token], {detached: true});
+  game.on("close", ()=>{
+    toggleLaunch(true);
+  });
+}
+
+function toggleLaunch(bool){
+  var launch = document.getElementById("launchbutton");
+  var running = document.getElementById("gamerunning");
+  if(bool){
+    running.style.display = "none";
+    launch.style.display = "block";
+  }else{
+    launch.style.display = "none";
+    running.style.display = "block";
+  }
 }
 
 function checkUpdates(){

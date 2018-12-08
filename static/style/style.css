@@ -61,6 +61,14 @@ html {
   position: absolute;
 }
 
+#gamerunning
+{
+  text-align: center;
+  width: 100%;
+  float: left;
+  font-size: 20px;
+}
+
 #profile{
   width: 30%;
   height: auto;

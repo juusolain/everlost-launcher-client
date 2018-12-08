@@ -42,7 +42,9 @@
     "nsis": {
       "oneClick": "false",
       "allowToChangeInstallationDirectory": "true",
-      "installerIcon": "build/icon.ico"
+      "installerIcon": "build/icon.ico",
+      "publisherName": "porkposh",
+      "certificateSubjectName": "porkposh"
     },
     "nsisWeb": {
       "allowToChangeInstallationDirectory": "true",

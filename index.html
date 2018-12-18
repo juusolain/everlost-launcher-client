@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; style-src * 'unsafe-inline'; font-src https:">
-    <link rel="stylesheet" type="text/css" media="all" href="style/style.css">
+    <link rel="stylesheet" type="text/css" media="all" href="static/style/style.css">
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <script src="client.js"></script>
   </head>
@@ -11,7 +11,7 @@
       <div id="loginscreen">
         <div id="customTitleBar" class="titlebar">
           <div class="titlebarbuttoncontainer" onclick="quitPress()">
-            <img src="resources/icons/close.png" class="titlebaricon" onclick="quitPress()">
+            <img src="static/resources/icons/close.png" class="titlebaricon" onclick="quitPress()">
           </div>
         </div>
         <div class="loginbox" id="loginbox">
@@ -24,12 +24,14 @@
           <div class="linkarea">
             <a onclick="setToRegister()" class="customlink" href="javascript:void(0);">Create a new account</a>
           </div>
-          <p id="invalidaccount" style="display: none">Username or password is incorrect, please try again</p>
+          <p id="invalidaccount" class="errormsg" style="display: none">Username or password is incorrect, please try again</p>
+          <p id="servererr_L" class="errormsg" style="display: none">Internal server error, please try again</p>
         </div>
         <div class="loginbox" id="registerbox" style="display: none">
           <input type="text" id="username_R" class="inputbox" placeholder="Username">
           <br>
           <input type="text" id="email_R" class="inputbox" placeholder="Email">
+          <input type="file">
           <br>
           <input type="password" id="password_R" class="inputbox" placeholder="Password">
           <br>
@@ -38,6 +40,8 @@
           <div class="linkarea">
             <a onclick="setToLogin()" class="customlink" href="javascript:void(0);">I already have an account</a>
           </div>
+          <p id="accountnoavail" class="errormsg" style="display: none">An account with that username or email already exists</p>
+          <p id="servererr_R" class="errormsg" style="display: none">Internal server error, please try again</p>
         </div>
       </div>
       <div id="mainscreen" style="display: none">
@@ -56,7 +60,7 @@
             </div>
             <div id="customTitleBar" class="titlebar">
               <div class="titlebarbuttoncontainer" onclick="quitPress()">
-                <img src="resources/icons/close.png" class="titlebaricon">
+                <img src="static/resources/icons/close.png" class="titlebaricon">
               </div>
             </div>
             <div id="launchupdate">
@@ -71,6 +75,12 @@
             </div>
             <div id="versioncontainer">
               <p id="version"></p>
+            </div>
+          </div>
+          <div id="settingsModal" class="modal">
+            <div class="modal-content">
+              <button value="Open" id="openSettingsbtn">
+              <button value="Close" id="closeSettingsbtn">
             </div>
           </div>
         </div>

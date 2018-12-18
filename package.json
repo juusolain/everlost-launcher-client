@@ -15,7 +15,7 @@
   "license": "SEE LICENSE IN ../../EULA.txt",
   "devDependencies": {
     "electron": "^3.0.10",
-    "electron-builder": "^20.38.2"
+    "electron-builder": "^20.38.3"
   },
   "dependencies": {
     "child_process": "^1.0.2",
@@ -35,8 +35,7 @@
       "category": "null"
     },
     "win": {
-      "target": "nsis",
-      "publisherName": "porkposh"
+      "target": "nsis"
     },
     "nsis": {
       "oneClick": "false",

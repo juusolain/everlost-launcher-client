@@ -98,7 +98,7 @@ exports.checkUpdates = function checkUpdates(cb){
 }
 
 
-exports.getUpdateURL = function getUpdateURL(cb){
+exports.getUpdates = function getUpdates(cb){
   let currentVersion = null;
   let fullDL = true;
   fs.readFile("/Game/version.txt", 'utf8', (fileErr, data) => {
@@ -133,10 +133,11 @@ exports.getUpdateURL = function getUpdateURL(cb){
           return parseFloat(a)-parseFloat(b);
         })
         if (parsedBody.length > 1){
-          let versionBefore = parsedBody[1].tag_name.replace(/[^0-9]/gi, '')
-          if(versionBefore == currentVersion){
-            fullDL = false;
-          }
+          parsedBody.forEach((elem)=>{
+            if(currentVersion == parseFloat(elem.tag_name.replace(/[^0-9]/gi, ''))){
+              fullDL = false;
+            }
+          })
         }
         request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases/"+parsedBody[0].id+"/assets", (err, httpR, body)=>{
           if(!err && body){
@@ -164,8 +165,13 @@ exports.getUpdateURL = function getUpdateURL(cb){
             console.log(parsedBody);
             if((currentVersion != parseFloat(parsedBody[0].tag_name.replace(/[^0-9]/gi, ''))) || fileErr){
               console.log('Updating to version: '+parsedBody[0].tag_name);
-
-              cb(true, parsedBody2[0].browser_download_url, parsedBody2[0].size, parsedBody[0].tag_name);
+              let totalSize = 0;
+              let downloadUrls = [];
+              parsedBody2.forEach((elem)=>{
+                totalSize+=elem.size;
+                downloadUrls.unshift(elem.browser_download_url);
+              })
+              cb(true, downloadUrls, totalSize, parsedBody[0].tag_name);
             }else{
               cb(false);
             }
@@ -183,20 +189,36 @@ exports.getUpdateURL = function getUpdateURL(cb){
 }
 
 
-exports.updateGame = function updateGame(url, size, version, cb, onProgress){
-
-  let currentdl = download(url);
-  currentdl.pipe(unzip.Extract({ path: 'Game/' }));
-  currentdl.on('downloadProgress', (progress)=>{
-    let progressPercent = progress.transferred / size * 100 + "%";
-    let progressPercentDisplay = (progress.transferred / size * 100).toFixed(0) + "%";
-    onProgress(progressPercent, progressPercentDisplay);
-  })
-  currentdl.on('error', (err)=>{
-    currentdl.destroy(err);
-    cb("Error");
-  });
-  currentdl.on('end', ()=>{
-    cb(null, version);
+exports.updateGame = function updateGame(urls, size, version, cb, onProgress){
+  let totalProgress = 0;
+  let currentItem = 0;
+  let downloadArr = function(cbDLArr){
+    let currentdl = download(urls[currentItem]);
+    currentdl.pipe(unzip.Extract({ path: 'Game/' }));
+    currentdl.on('downloadProgress', (progress)=>{
+      let progressPercent = progress.transferred+totalProgress / size * 100 + "%";
+      let progressPercentDisplay = (progress.transferred+totalProgress / size * 100).toFixed(0) + "%";
+      onProgressLower(progressPercent, progressPercentDisplay);
+    });
+    currentdl.on('error', (err)=>{
+      currentdl.destroy(err);
+      cbDLArr(false, "Error");
+    });
+    currentdl.on('end', ()=>{
+      totalProgress+=size;
+      currentItem++;
+      if(currentItem < downloads.length){
+        downloadArrItem(complete);
+      }else{
+        cbDLArr(true, null)
+      }
+    })
+  }
+  downloadArrItem((complete, err)=>{
+    if(complete && !err){
+      cb(true, version);
+    }else{
+      cb(false, "-1");
+    }
   })
 }

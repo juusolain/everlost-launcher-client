@@ -268,16 +268,16 @@ function setToUpdate(version){
 
 function updatePressed(){
   clearInterval(updateInterval);
-  gameUpdater.getUpdateURL((isAvail, url, size, toVersion)=>{
+  gameUpdater.getUpdates((isAvail, urls, size, toVersion)=>{
     if(isAvail){
-      updateGame(url,size, toVersion);
+      updateGame(urls,size, toVersion);
     }else{
       setToMain();
     }
   });
 }
 
-function updateGame(url,size, toVersion){
+function updateGame(urls ,size, toVersion){
   var updateButton = document.getElementById("updatebutton");
   var updatebar = document.getElementById("updatebar");
   var progressText = document.getElementById("updateprogress");
@@ -293,7 +293,7 @@ function updateGame(url,size, toVersion){
   console.log(version);
   updating.textContent = "Updating to: "+toVersion;
   let lastProgress = null;
-  gameUpdater.updateGame(url,size, toVersion, (error, version)=>{
+  gameUpdater.updateGame(urls, size, toVersion, (error, version)=>{
     if(!error){
       gameIsUpdated(true, version);
     }

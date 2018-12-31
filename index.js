@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const url = require('url');
+const request = require('request');
 const currentVersion = app.getVersion();
 let win
 
@@ -15,7 +16,7 @@ function createWindow() {
     win.show();
   });
 
-  checkForUpdates();
+  //checkForUpdates();
   //win.on('closed', () => {
     //win = null;
   //})

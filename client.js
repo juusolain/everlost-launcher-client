@@ -210,9 +210,12 @@ function setToMain(){
 }
 
 function checkUpdates(){
-  gameUpdater.checkUpdates((result)=>{
-    if(result){
-      setToUpdate(result);
+  gameUpdater.getUpdates((avail, urls, size, version)=>{
+    if(avail){
+      console.log("avail, "+version)
+      setToUpdate(version);
+    }else{
+
     }
   })
 
@@ -270,8 +273,10 @@ function updatePressed(){
   clearInterval(updateInterval);
   gameUpdater.getUpdates((isAvail, urls, size, toVersion)=>{
     if(isAvail){
+      console.log("updategame: "+toVersion)
       updateGame(urls,size, toVersion);
     }else{
+      console.log("noAvail-UPDATE");
       setToMain();
     }
   });

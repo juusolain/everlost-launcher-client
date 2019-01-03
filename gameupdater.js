@@ -4,6 +4,8 @@ https.globalAgent.options.ca = require('ssl-root-cas/latest').create();
 const serverUrl = "https://everlost.jusola.cf/";
 const download = require('download');
 const fs = require('fs');
+const md5File = require("md5-file")
+const CryptoJS = require('crypto-js');
 const unzip = require('unzip');
 var configContent = fs.readFileSync("config.json");
 var config = JSON.parse(configContent);
@@ -22,7 +24,7 @@ exports.checkUpdates = function checkUpdates(cb){
 exports.getUpdates = function getUpdates(cb){
   let currentVersion = null;
   let fullDL = true;
-  fs.readFile("/Game/version.txt", 'utf8', (fileErr, data) => {
+  fs.readFile("Game/version.txt", 'utf8', (fileErr, data) => {
     if(!fileErr){
       currentVersion = parseFloat(data.replace(/[^0-9]/gi, ''));
     }else{
@@ -165,4 +167,78 @@ exports.updateGame = function updateGame(urls, size, version, cb, onProgress){
       cb(false, "-1");
     }
   })
+}
+
+
+function getCurrentVersion(cb){
+  getChecksums((checksums)=>{
+    checksum = md5File("Game/Everlost/Binaries/Win64/Everlost.exe");
+    console.log(checksum);
+    version = getKeyForValue(checksums, data);
+    if(version){
+        cb(version);
+      }else{
+        console.log("InvalidVersion");
+        cb(false, "ERROR");
+      }
+  });
+}
+
+exports.writeValidVersion = function(){
+  getCurrentVersion((version, error)=>{
+    if(version){
+      console.log(version);
+      fs.writeFile('Game/version.txt', version, (err)=>{
+        console.log(err);
+      });
+    }else{
+      console.log("NoRelease");
+    }
+  })
+}
+
+function getChecksums(cb){ //Get checksums of all releases
+  request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases", (err, httpResponse, body)=>{ //Get all releases
+    if(!err){
+      let parsedBody = JSON.parse(body);
+      request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases/"+parsedBody[0].id+"/assets", (err, httpR, body)=>{//Get latest release files
+        if(!err && body){
+          let parsedBody2 = JSON.parse(body);
+          console.log(parsedBody2);
+          let checksums = parsedBody2.find((elem)=>{//Find checksums.json from all releases
+            return elem.name == "checksums.json";
+          });
+          if(checksums){//check if checksums exits
+            request.get(checksums.browser_download_url, (err, httpR, body)=>{
+              if(!err){
+                checksumsParsedBody = JSON.parse(body);
+                cb(checksumsParsedBody);
+              }else{
+                console.error(error);
+                cb(false)
+              }
+
+            })
+          }else{
+            console.error("NoChecksum")
+          }
+        }else{
+          cb(false);
+          console.log(err);
+        }
+      })
+    }else{
+      cb(false);
+      console.log(err);
+    }
+  })
+}
+
+
+
+
+function getKeyForValue(object, value) {
+  return Object.keys(object).find((key)=>{
+     object[key] === value;
+  });
 }

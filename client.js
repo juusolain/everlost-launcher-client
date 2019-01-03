@@ -210,6 +210,7 @@ function setToMain(){
 }
 
 function checkUpdates(){
+  gameUpdater.writeValidVersion();
   gameUpdater.getUpdates((avail, urls, size, version)=>{
     if(avail){
       console.log("avail, "+version)
@@ -335,6 +336,7 @@ function gameIsUpdated(bUpdated, version){
     fs.writeFile('Game/version.txt', version, (err)=>{
       console.log(err);
     });
+    gameUpdater.writeValidVersion();
   }
 
 }

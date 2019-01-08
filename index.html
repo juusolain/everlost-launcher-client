@@ -31,7 +31,6 @@
           <input type="text" id="username_R" class="inputbox" placeholder="Username">
           <br>
           <input type="text" id="email_R" class="inputbox" placeholder="Email">
-          <input type="file">
           <br>
           <input type="password" id="password_R" class="inputbox" placeholder="Password">
           <br>
@@ -56,6 +55,7 @@
                   <p id="usernamedisplay"></p>
                 </div>
               </div>
+              <button value="Open" id="openSettingsbtn" onclick="openSettings()">
               <button onclick="logout()" id="logoutbutton" class="button"><a>Logout</a></button>
             </div>
             <div id="customTitleBar" class="titlebar">
@@ -79,8 +79,10 @@
           </div>
           <div id="settingsModal" class="modal">
             <div class="modal-content">
-              <button value="Open" id="openSettingsbtn">
-              <button value="Close" id="closeSettingsbtn">
+              <input type="file" id="installLocSelect" style="display: none" webkitdirectory directory multiple>
+              <div class="settingsbuttoncontainer" onclick="closeSettings()">
+                <img src="static/resources/icons/close.png" class="settingsbutton" onclick="closeSettings()">
+              </div>
             </div>
           </div>
         </div>

@@ -45,7 +45,7 @@ html {
 /* Modal Content */
 .modal-content {
   animation: fadein 1s;
-  padding: 2.5% 5% 2.5%;
+  padding: 1% 2.5% 1%;
   width: 30%;
   height: 60%;
   position: absolute;
@@ -355,6 +355,30 @@ p{
 }
 
 .titlebarbuttoncontainer:hover{
+  background-color: #7289DA;
+  cursor: pointer;
+}
+
+
+.settingsbuttoncontainer{
+  background-color: rgba(0,0,0,.1);
+  transition: background-color 0.25s;
+  padding: 4px;
+  margin: 0px;
+  float: right;
+  height: 24px;
+  width: 24px;
+}
+
+.settingsbutton{
+  padding: 0px;
+  margin: 0px;
+  float: right;
+  height: 20px;
+  width: 20px;
+}
+
+.settingsbuttoncontainer:hover{
   background-color: #7289DA;
   cursor: pointer;
 }

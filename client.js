@@ -187,10 +187,6 @@ function setToMain(){
       loginscreen.style.display = "none";
       mainscreen.style.display = "block";
       var settingsModal = document.getElementById('settingsModal');
-      var openSettingsbtn = document.getElementById("openSettingsbtn");
-      var closeSettingsbtn = document.getElementById("closeSettingsbtn");
-      closeSettingsbtn.onclick = "closeSettings()";
-      openSettingsbtn.onclick= "openSettings()";
       updateInterval = setInterval(()=>{
         checkUpdates();
       }, 60000);
@@ -216,7 +212,7 @@ function checkUpdates(){
       console.log("avail, "+version)
       setToUpdate(version);
     }else{
-
+      gameIsUpdated(false, version);
     }
   })
 
@@ -228,10 +224,11 @@ function quitPress(){
 }
 
 function launch(){
-  const game = execFile("Game/Everlost.exe", ["172.23.189.179", "-username="+currentUserName, "-token="+token], {detached: true});
+  const game = execFile("Game/Everlost.exe", ["mainmenu", "-username="+currentUserName, "-token="+token], {detached: true});
   toggleLaunch(false);
   game.on("close", ()=>{
     toggleLaunch(true);
+    console.log("Game closed");
   });
 }
 
@@ -351,8 +348,6 @@ function gameIsUpdated(bUpdated, version){
 
 function openSettings(){
   var settingsModal = document.getElementById('settingsModal');
-  var openSettingsbtn = document.getElementById("openSettings");
-  var closeSettingsbtn = document.getElementById("closeSettings");
     settingsModal.style.display = "block";
 }
 
@@ -362,8 +357,6 @@ function openSettings(){
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
   var settingsModal = document.getElementById('settingsModal');
-  var openSettingsbtn = document.getElementById("openSettings");
-  var closeSettingsbtn = document.getElementById("closeSettings");
   if (event.target == settingsModal) {
     closeSettings();
   }
@@ -371,7 +364,5 @@ window.onclick = function(event) {
 
 function closeSettings(){
   var settingsModal = document.getElementById('settingsModal');
-  var openSettingsbtn = document.getElementById("openSettings");
-  var closeSettingsbtn = document.getElementById("closeSettings");
   settingsModal.style.display = "none";
 }

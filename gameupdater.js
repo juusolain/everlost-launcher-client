@@ -172,15 +172,19 @@ exports.updateGame = function updateGame(urls, size, version, cb, onProgress){
 
 function getCurrentVersion(cb){
   getChecksums((checksums)=>{
-    checksum = md5File("Game/Everlost/Binaries/Win64/Everlost.exe");
-    console.log(checksum);
-    version = getKeyForValue(checksums, data);
-    if(version){
-        cb(version);
-      }else{
-        console.log("InvalidVersion");
-        cb(false, "ERROR");
+    checksum = md5File("Game/Everlost/Binaries/Win64/Everlost.exe", (err, checksum)=>{
+      if(!err){
+        console.log(checksum);
+        version = getKeyForValue(checksums, checksum);
+        if(version){
+            cb(version);
+          }else{
+            console.log("InvalidVersion");
+            cb(false, "ERROR");
+        }
       }
+
+    });
   });
 }
 
@@ -212,6 +216,7 @@ function getChecksums(cb){ //Get checksums of all releases
             request.get(checksums.browser_download_url, (err, httpR, body)=>{
               if(!err){
                 checksumsParsedBody = JSON.parse(body);
+                console.log(checksumsParsedBody)
                 cb(checksumsParsedBody);
               }else{
                 console.error(error);
@@ -238,7 +243,8 @@ function getChecksums(cb){ //Get checksums of all releases
 
 
 function getKeyForValue(object, value) {
-  return Object.keys(object).find((key)=>{
-     object[key] === value;
+  let key = Object.keys(object).find((key)=>{
+     return object[key] == value;
   });
+  return key;
 }

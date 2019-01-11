@@ -44,6 +44,7 @@ html {
 
 /* Modal Content */
 .modal-content {
+  -webkit-app-region: no-drag;
   animation: fadein 1s;
   padding: 1% 2.5% 1%;
   width: 30%;
@@ -337,6 +338,7 @@ p{
 
 
 .titlebarbuttoncontainer{
+  -webkit-app-region: no-drag;
   background-color: rgba(0,0,0,.1);
   transition: background-color 0.25s;
   padding: 4px;

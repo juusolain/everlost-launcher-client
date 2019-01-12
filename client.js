@@ -21,7 +21,15 @@ if(config.installLoc){
 }
 const gameUpdater = require("./gameupdater.js");
 
-
+window.onload = function(){
+  var settingsModal = document.getElementById('settingsModal');
+  settingsModal.addEventListener('animationend', function() {
+    if (this.classList.contains('fadedout')) {
+      this.style.display = 'none';
+      this.classList.remove('fadedout')
+    }
+  });
+}
 
 var clientConfig = {
   preRelease: true,
@@ -348,7 +356,10 @@ function gameIsUpdated(bUpdated, version){
 
 function openSettings(){
   var settingsModal = document.getElementById('settingsModal');
-    settingsModal.style.display = "block";
+  if(settingsModal.classList.contains('fadedout')){
+    settingsModal.classList.remove('fadedout');
+  }
+  settingsModal.style.display = "block";
 }
 
 // When the user clicks on <span> (x), close the modal
@@ -364,5 +375,5 @@ window.onclick = function(event) {
 
 function closeSettings(){
   var settingsModal = document.getElementById('settingsModal');
-  settingsModal.style.display = "none";
+  settingsModal.classList.add('fadedout');
 }

@@ -79,9 +79,16 @@
           </div>
           <div id="settingsModal" class="modal">
             <div class="modal-content">
-              <input type="file" id="installLocSelect" style="display: none" webkitdirectory directory multiple>
               <div class="closesettingsbuttoncontainer" onclick="closeSettings()">
                 <img src="static/resources/icons/close.png" class="closesettingsbutton" onclick="closeSettings()">
+              </div>
+              <input type="file" id="installLocSelect" style="display: none" webkitdirectory directory multiple>
+              <div id="settingscontainer">
+                <p class="settingsdescription">Install location</p>
+                <br>
+                <div id="settings-installloc-container">
+                  <p id="settings-installloc">Installloc</p>
+                </div>
               </div>
             </div>
           </div>

@@ -8,12 +8,13 @@ let win
 console.log(currentVersion)
 
 function createWindow() {
-  win = new BrowserWindow({ width: 1440, height: 810, autoHideMenuBar: true, backgroundColor: "#2C2F33", show: false, resizable: false, frame: false, icon:'build/icon.png', webPreferences: {devTools: true}});
+  win = new BrowserWindow({ width: 1440, height: 810, autoHideMenuBar: true, backgroundColor: "#2C2F33", show: false, resizable: false, frame: false, icon:'build/icon.png', webPreferences: {devTools: true, nodeIntegration: true}});
 
   win.loadFile('index.html');
 
   win.once('ready-to-show', () => {
     win.show();
+    win.webContents.openDevTools();
   });
 
   //checkForUpdates();

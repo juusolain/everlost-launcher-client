@@ -9,9 +9,10 @@ const CryptoJS = require('crypto-js');
 const unzip = require('unzip');
 var configContent = fs.readFileSync("config.json");
 var config = JSON.parse(configContent);
-if(config){
-  installLoc = config.installLoc;
+if(config.gameInstallLoc != "" && config.preRelease != NULL && config.platform){
+  installLoc = config.gameInstallLoc;
 }else{
+  config.gameInstallLoc = __dirname+"/"
   config.preRelease = false;
   config.platform = process.platform;
 }
@@ -24,7 +25,7 @@ exports.checkUpdates = function checkUpdates(cb){
 exports.getUpdates = function getUpdates(cb){
   let currentVersion = null;
   let fullDL = true;
-  fs.readFile("Game/version.txt", 'utf8', (fileErr, data) => {
+  fs.readFile(config.gameInstallLoc+"Game/version.txt", 'utf8', (fileErr, data) => {
     if(!fileErr){
       currentVersion = parseFloat(data.replace(/[^0-9]/gi, ''));
     }else{
@@ -138,7 +139,7 @@ exports.updateGame = function updateGame(urls, size, version, cb, onProgress){
   let downloadArr = function(cbDLArr){
     console.log("Downloading: "+urls[currentItem]);
     let currentdl = download(urls[currentItem]);
-    currentdl.pipe(unzip.Extract({ path: 'Game/' }));
+    currentdl.pipe(unzip.Extract({ path: config.gameInstallLoc+'Game/' }));
     currentdl.on('downloadProgress', (progress)=>{
       let progressPercent = (progress.transferred+totalProgress) / size * 100 + "%";
       let progressPercentDisplay = ((progress.transferred+totalProgress) / size * 100).toFixed(0) + "%";
@@ -172,7 +173,7 @@ exports.updateGame = function updateGame(urls, size, version, cb, onProgress){
 
 function getCurrentVersion(cb){
   getChecksums((checksums)=>{
-    checksum = md5File("Game/Everlost/Binaries/Win64/Everlost.exe", (err, checksum)=>{
+    checksum = md5File(config.gameInstallLoc+"Game/Everlost/Binaries/Win64/Everlost.exe", (err, checksum)=>{
       if(!err){
         console.log(checksum);
         version = getKeyForValue(checksums, checksum);
@@ -192,7 +193,7 @@ exports.writeValidVersion = function(){
   getCurrentVersion((version, error)=>{
     if(version){
       console.log(version);
-      fs.writeFile('Game/version.txt', version, (err)=>{
+      fs.writeFile(config.gameInstallLoc+'Game/version.txt', version, (err)=>{
         console.log(err);
       });
     }else{

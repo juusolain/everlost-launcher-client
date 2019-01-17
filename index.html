@@ -55,12 +55,15 @@
                   <p id="usernamedisplay"></p>
                 </div>
               </div>
-              <button value="Open" id="openSettingsbtn" onclick="openSettings()">
+
               <button onclick="logout()" id="logoutbutton" class="button"><a>Logout</a></button>
             </div>
             <div id="customTitleBar" class="titlebar">
               <div class="titlebarbuttoncontainer" onclick="quitPress()">
-                <img src="static/resources/icons/close.png" class="titlebaricon">
+                <img src="static/resources/icons/close.png" class="titlebaricon" onclick="quitPress()">
+              </div>
+              <div class="titlebarbuttoncontainer" onclick="openSettings()">
+                <img src="static/resources/icons/settings.png" class="titlebaricon" onclick="openSettings()">
               </div>
             </div>
             <div id="launchupdate">

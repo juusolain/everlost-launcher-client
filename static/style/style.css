@@ -54,13 +54,13 @@ html {
 .modal-content {
   -webkit-app-region: no-drag;
   animation: fadein 1s;
-  padding: 1% 2.5% 1%;
-  width: 30%;
-  height: 60%;
+  padding: 0.5%;
+  width: 50%;
+  height: 75%;
   position: absolute;
   background-color: #2C2F33;
   left: 50%;
-  top: 50%;
+  top: 40%;
   transform: translate(-50%, -50%);
   border-radius: 3px;
   border-color: rgba(0,0,0,.1);

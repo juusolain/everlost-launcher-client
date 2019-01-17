@@ -16,9 +16,14 @@ const fs = require('fs');
 const unzip = require('unzip');
 var configContent = fs.readFileSync("config.json");
 const config = JSON.parse(configContent);
-if(config.installLoc){
-  installLoc = config.installLoc;
+if(config.gameInstallLoc != "" && config.platform){
+  installLoc = config.gameInstallLoc;
+}else{
+  config.gameInstallLoc = __dirname+"/"
+  config.preRelease = false;
+  config.platform = process.platform;
 }
+
 const gameUpdater = require("./gameupdater.js");
 
 window.onload = function(){
@@ -31,7 +36,7 @@ window.onload = function(){
   });
 }
 
-var clientConfig = {
+var defaultClientConfig = {
   preRelease: true,
   platform: "Win64"
 };
@@ -181,7 +186,7 @@ function setToMain(){
   getUserdata((success)=>{
     if(success){
       var versionDisplay = document.getElementById("version");
-      fs.readFile('Game/version.txt', 'utf8', (fileErr, data) => {
+      fs.readFile(config.gameInstallLoc+'Game/version.txt', 'utf8', (fileErr, data) => {
         if(!fileErr){
           versionDisplay.textContent = data;
         }
@@ -232,7 +237,7 @@ function quitPress(){
 }
 
 function launch(){
-  const game = execFile("Game/Everlost.exe", ["mainmenu", "-username="+currentUserName, "-token="+token], {detached: true});
+  const game = execFile(config.gameInstallLoc+"Game/Everlost.exe", ["mainmenu", "-username="+currentUserName, "-token="+token], {detached: true});
   toggleLaunch(false);
   game.on("close", ()=>{
     toggleLaunch(true);
@@ -338,7 +343,7 @@ function gameIsUpdated(bUpdated, version){
   launchbutton.style.display = "block";
   loadingBar.style.display = "none";
   if(bUpdated){
-    fs.writeFile('Game/version.txt', version, (err)=>{
+    fs.writeFile(config.gameInstallLoc+'Game/version.txt', version, (err)=>{
       console.log(err);
     });
     gameUpdater.writeValidVersion();
@@ -356,10 +361,12 @@ function gameIsUpdated(bUpdated, version){
 
 function openSettings(){
   var settingsModal = document.getElementById('settingsModal');
+  var gameinstall = document.getElementById('settings-installloc');
   if(settingsModal.classList.contains('fadedout')){
     settingsModal.classList.remove('fadedout');
   }
   settingsModal.style.display = "block";
+  gameinstall.textContent = config.gameInstallLoc;
 }
 
 // When the user clicks on <span> (x), close the modal
@@ -376,4 +383,24 @@ window.onclick = function(event) {
 function closeSettings(){
   var settingsModal = document.getElementById('settingsModal');
   settingsModal.classList.add('fadedout');
+}
+
+function saveSettings(){
+  fs.writeFile("config.json", JSON.stringify(config),(err)=>{
+    if(err) console.log(err);
+  })
+}
+
+function selectInstallLoc(){
+  var fileChooser = document.getElementById('installLocSelect');
+  fileChooser.click();
+}
+
+function installLocChanged(){
+  var fileChooser = document.getElementById('installLocSelect');
+  config.gameInstallLoc = fileChooser.files[0].path;
+  console.log(config.gameInstallLoc);
+  var gameinstall = document.getElementById('settings-installloc');
+  gameinstall.textContent = config.gameInstallLoc;
+  saveSettings();
 }

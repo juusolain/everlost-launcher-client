@@ -85,11 +85,11 @@
               <div class="closesettingsbuttoncontainer" onclick="closeSettings()">
                 <img src="static/resources/icons/close.png" class="closesettingsbutton" onclick="closeSettings()">
               </div>
-              <input type="file" id="installLocSelect" style="display: none" webkitdirectory directory multiple>
+              <input type="file" id="installLocSelect" style="display: none" onchange="installLocChanged()" webkitdirectory directory multiple>
               <div id="settingscontainer">
                 <p class="settingsdescription">Install location</p>
                 <br>
-                <div id="settings-installloc-container">
+                <div id="settings-installloc-container" onclick="selectInstallLoc()">
                   <p id="settings-installloc">Installloc</p>
                 </div>
               </div>

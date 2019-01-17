@@ -9,7 +9,7 @@ const CryptoJS = require('crypto-js');
 const unzip = require('unzip');
 var configContent = fs.readFileSync("config.json");
 var config = JSON.parse(configContent);
-if(config.gameInstallLoc != "" && config.preRelease != NULL && config.platform){
+if(config.gameInstallLoc != "" && config.platform){
   installLoc = config.gameInstallLoc;
 }else{
   config.gameInstallLoc = __dirname+"/"

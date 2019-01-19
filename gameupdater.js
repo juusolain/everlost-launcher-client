@@ -6,17 +6,18 @@ const download = require('download');
 const fs = require('fs');
 const md5File = require("md5-file")
 const CryptoJS = require('crypto-js');
-const unzip = require('unzip');
+const unzip = require('unzipper');
 var configContent = fs.readFileSync("config.json");
 var config = JSON.parse(configContent);
 if(config.gameInstallLoc != "" && config.platform){
-  installLoc = config.gameInstallLoc;
+  config.gameInstallLoc = config.gameInstallLoc+"/";
 }else{
   config.gameInstallLoc = __dirname+"/"
   config.preRelease = false;
   config.platform = process.platform;
 }
 
+console.log(config.gameInstallLoc);
 exports.checkUpdates = function checkUpdates(cb){
   console.warn("Deprecated, use gameupdater.getUpdates instead");
 }
@@ -80,9 +81,9 @@ exports.getUpdates = function getUpdates(cb){
           if(!err && body){
             let parsedBody2 = JSON.parse(body);
             parsedBody2 = parsedBody2.filter((elem)=>{
-                if(elem.name.includes(config.platform)){
+                if(elem.name.toLowerCase().includes(config.platform.toLowerCase())){
                   if(!fullDL){
-                    if(elem.name.includes(config.platform) && elem.name.toLowerCase().includes("update")){
+                    if(elem.name.toLowerCase().includes("update")){
                       return true;
                     }else{
                       return false;
@@ -99,7 +100,6 @@ exports.getUpdates = function getUpdates(cb){
                   return false;
                 }
             });
-            console.log(parsedBody);
             if((currentVersion != parseFloat(parsedBody[0].tag_name.replace(/[^0-9]/gi, ''))) || fileErr){
               console.log('Updating to version: '+parsedBody[0].tag_name);
               let totalSize = 0;
@@ -113,7 +113,6 @@ exports.getUpdates = function getUpdates(cb){
               }else{
                 cb(true, downloadUrls, totalSize, parsedBody[0].tag_name);
               }
-              console.log(downloadUrls);
             }else{
               cb(false);
             }
@@ -154,7 +153,7 @@ exports.updateGame = function updateGame(urls, size, version, cb, onProgress){
       console.log("Downloaded item: "+urls[currentItem]);
       totalProgress+=size;
       currentItem++;
-      if(currentItem < downloads.length){
+      if(currentItem < urls.length){
         downloadArr(complete);
       }else{
         cbDLArr(true, null)
@@ -171,7 +170,7 @@ exports.updateGame = function updateGame(urls, size, version, cb, onProgress){
 }
 
 
-function getCurrentVersion(cb){
+/*function getCurrentVersion(cb){
   getChecksums((checksums)=>{
     checksum = md5File(config.gameInstallLoc+"Game/Everlost/Binaries/Win64/Everlost.exe", (err, checksum)=>{
       if(!err){
@@ -196,11 +195,9 @@ exports.writeValidVersion = function(){
       fs.writeFile(config.gameInstallLoc+'Game/version.txt', version, (err)=>{
         console.log(err);
       });
-    }else{
-      console.log("NoRelease");
     }
   })
-}
+}*/
 
 function getChecksums(cb){ //Get checksums of all releases
   request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases", (err, httpResponse, body)=>{ //Get all releases
@@ -217,7 +214,6 @@ function getChecksums(cb){ //Get checksums of all releases
             request.get(checksums.browser_download_url, (err, httpR, body)=>{
               if(!err){
                 checksumsParsedBody = JSON.parse(body);
-                console.log(checksumsParsedBody)
                 cb(checksumsParsedBody);
               }else{
                 console.error(error);
@@ -225,8 +221,6 @@ function getChecksums(cb){ //Get checksums of all releases
               }
 
             })
-          }else{
-            console.error("NoChecksum")
           }
         }else{
           cb(false);

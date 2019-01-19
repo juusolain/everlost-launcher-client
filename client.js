@@ -17,7 +17,7 @@ const unzip = require('unzip');
 var configContent = fs.readFileSync("config.json");
 const config = JSON.parse(configContent);
 if(config.gameInstallLoc != "" && config.platform){
-  installLoc = config.gameInstallLoc;
+  config.gameInstallLoc = config.gameInstallLoc+"/";
 }else{
   config.gameInstallLoc = __dirname+"/"
   config.preRelease = false;
@@ -219,7 +219,6 @@ function setToMain(){
 }
 
 function checkUpdates(){
-  gameUpdater.writeValidVersion();
   gameUpdater.getUpdates((avail, urls, size, version)=>{
     if(avail){
       console.log("avail, "+version)
@@ -237,7 +236,13 @@ function quitPress(){
 }
 
 function launch(){
-  const game = execFile(config.gameInstallLoc+"Game/Everlost.exe", ["mainmenu", "-username="+currentUserName, "-token="+token], {detached: true});
+  let launchOpts;
+  if(config.devServer){
+    launchOpts = ["172.23.189.179", "-username="+currentUserName, "-token="+token];
+  }else{
+    launchOpts = ["mainmenu", "-username="+currentUserName, "-token="+token];
+  }
+  const game = execFile(config.gameInstallLoc+"Game/Everlost.exe", launchOpts, {detached: true});
   toggleLaunch(false);
   game.on("close", ()=>{
     toggleLaunch(true);
@@ -346,7 +351,6 @@ function gameIsUpdated(bUpdated, version){
     fs.writeFile(config.gameInstallLoc+'Game/version.txt', version, (err)=>{
       console.log(err);
     });
-    gameUpdater.writeValidVersion();
   }
 
 }

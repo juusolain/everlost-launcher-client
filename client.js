@@ -13,7 +13,7 @@ var updateInterval = null;
 var currentUserName;
 const download = require('download');
 const fs = require('fs');
-const unzip = require('unzip');
+const unzip = require('unzipper');
 var configContent = fs.readFileSync("config.json");
 const config = JSON.parse(configContent);
 if(config.gameInstallLoc != "" && config.platform){

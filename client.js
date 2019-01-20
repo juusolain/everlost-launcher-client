@@ -221,7 +221,6 @@ function setToMain(){
 function checkUpdates(){
   gameUpdater.getUpdates((avail, urls, size, version)=>{
     if(avail){
-      console.log("avail, "+version)
       setToUpdate(version);
     }else{
       gameIsUpdated(false, version);
@@ -238,7 +237,7 @@ function quitPress(){
 function launch(){
   let launchOpts;
   if(config.devServer){
-    launchOpts = ["172.23.189.179", "-username="+currentUserName, "-token="+token];
+    launchOpts = ["172.23.189.179//Game/Map/Planet/Planet?Name="+currentUserName, "-username="+currentUserName, "-token="+token];
   }else{
     launchOpts = ["mainmenu", "-username="+currentUserName, "-token="+token];
   }
@@ -314,8 +313,8 @@ function updateGame(urls ,size, toVersion){
   console.log(version);
   updating.textContent = "Updating to: "+toVersion;
   let lastProgress = null;
-  gameUpdater.updateGame(urls, size, toVersion, (error, version)=>{
-    if(!error){
+  gameUpdater.updateGame(urls, size, toVersion, (complete, version)=>{
+    if(complete){
       gameIsUpdated(true, version);
     }
   }, (uprogress, uprogressdisp)=>{

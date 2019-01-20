@@ -10,7 +10,7 @@ const unzip = require('unzipper');
 var configContent = fs.readFileSync("config.json");
 var config = JSON.parse(configContent);
 if(config.gameInstallLoc != "" && config.platform){
-  config.gameInstallLoc = config.gameInstallLoc+"/";
+  config.gameInstallLoc = config.gameInstallLoc+"\\";
 }else{
   config.gameInstallLoc = __dirname+"/"
   config.preRelease = false;
@@ -101,7 +101,6 @@ exports.getUpdates = function getUpdates(cb){
                 }
             });
             if((currentVersion != parseFloat(parsedBody[0].tag_name.replace(/[^0-9]/gi, ''))) || fileErr){
-              console.log('Updating to version: '+parsedBody[0].tag_name);
               let totalSize = 0;
               let downloadUrls = [];
               parsedBody2.forEach((elem)=>{
@@ -133,12 +132,13 @@ exports.getUpdates = function getUpdates(cb){
 
 
 exports.updateGame = function updateGame(urls, size, version, cb, onProgress){
+  console.log("Updating to version: "+version)
   let totalProgress = 0;
   let currentItem = 0;
   let downloadArr = function(cbDLArr){
     console.log("Downloading: "+urls[currentItem]);
     let currentdl = download(urls[currentItem]);
-    currentdl.pipe(unzip.Extract({ path: config.gameInstallLoc+'Game/' }));
+    currentdl.pipe(unzip.Extract({ path: config.gameInstallLoc+'Game' }));
     currentdl.on('downloadProgress', (progress)=>{
       let progressPercent = (progress.transferred+totalProgress) / size * 100 + "%";
       let progressPercentDisplay = ((progress.transferred+totalProgress) / size * 100).toFixed(0) + "%";
@@ -161,14 +161,13 @@ exports.updateGame = function updateGame(urls, size, version, cb, onProgress){
     })
   }
   downloadArr((complete, err)=>{
-    if(complete && !err){
+    if(complete){
       cb(true, version);
     }else{
       cb(false, "-1");
     }
   })
 }
-
 
 /*function getCurrentVersion(cb){
   getChecksums((checksums)=>{

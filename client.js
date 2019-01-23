@@ -117,7 +117,7 @@ function getUserdata(cb){
 }
 
 function getUserIcon(usernameToGet, cb){
-  request.get({url: serverUrl+"getusericon", form: {username: usernameToGet}, encoding: null}, (err,httpResponse,body)=>{
+  request.get({url: serverUrl+"getusericon", form: {username: usernameToGet}, encoding: null, timeout: 5000}, (err,httpResponse,body)=>{
     if(!err && body){
       fs.writeFile("cache/icon/"+usernameToGet+".png", body, (err)=>{
         if(!err){
@@ -137,7 +137,7 @@ function login(){
   var servererr = document.getElementById("servererr_L");
   var password = document.getElementById("password_L").value;
   var encryptedPW = CryptoJS.SHA256(password).toString();
-  request.get({url: serverUrl+"login", form: {login: login, password: encryptedPW}}, (err,httpResponse,body)=>{
+  request.get({url: serverUrl+"login", form: {login: login, password: encryptedPW, timeout: 5000}}, (err,httpResponse,body)=>{
     if(!err){
       let elembody = JSON.parse(body);
       console.log(elembody);
@@ -158,6 +158,12 @@ function login(){
           servererr.style.display="none";
         }, 7500);
       }
+    }else{
+      console.log(err);
+      servererr.style.display = "block";
+      setTimeout(()=>{
+        servererr.style.display="none";
+      }, 7500);
     }
 
   })

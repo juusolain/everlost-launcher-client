@@ -77,7 +77,8 @@ exports.getUpdates = function getUpdates(cb){
           cb(false);
           return;
         }
-        request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases/"+parsedBody[0].id+"/assets", (err, httpR, body)=>{
+        console.log(parsedBody);
+        request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases/"+parsedBody[parsedBody.length-1].id+"/assets", (err, httpR, body)=>{
           if(!err && body){
             let parsedBody2 = JSON.parse(body);
             parsedBody2 = parsedBody2.filter((elem)=>{
@@ -100,7 +101,7 @@ exports.getUpdates = function getUpdates(cb){
                   return false;
                 }
             });
-            if((currentVersion != parseFloat(parsedBody[0].tag_name.replace(/[^0-9]/gi, ''))) || fileErr){
+            if((currentVersion != parseFloat(parsedBody[parsedBody.length-1].tag_name.replace(/[^0-9]/gi, ''))) || fileErr){
               let totalSize = 0;
               let downloadUrls = [];
               parsedBody2.forEach((elem)=>{
@@ -108,9 +109,10 @@ exports.getUpdates = function getUpdates(cb){
                 downloadUrls.unshift(elem.browser_download_url);
               })
               if(fullDL){
-                cb(true, [parsedBody2[0].browser_download_url], parsedBody2[0].size, parsedBody[0].tag_name);
+
+                cb(true, [parsedBody2[parsedBody2.length-1].browser_download_url], parsedBody2[parsedBody2.length-1].size, parsedBody[parsedBody.length-1].tag_name);
               }else{
-                cb(true, downloadUrls, totalSize, parsedBody[0].tag_name);
+                cb(true, downloadUrls, totalSize, parsedBody[parsedBody.length-1].tag_name);
               }
             }else{
               cb(false);

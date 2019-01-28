@@ -397,6 +397,7 @@ function closeSettings(){
 function saveSettings(){
   fs.writeFile("config.json", JSON.stringify(config),(err)=>{
     if(err) console.log(err);
+    checkForUpdates();
   })
 }
 

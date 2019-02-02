@@ -12,7 +12,7 @@ var installLoc = "";
 var updateInterval = null;
 var currentUserName;
 const download = require('download');
-const path = require('path').
+const path = require('path');
 const fs = require('fs');
 const unzip = require('unzipper');
 var configContent;

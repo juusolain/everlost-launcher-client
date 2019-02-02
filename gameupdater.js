@@ -14,11 +14,7 @@ try {
   configContent = fs.readFileSync("config.json");
   config = JSON.parse(configContent);
 } catch (err) {
-  fs.copyFile("defaultconfig.json", "config.json", (err)=>{
-    if(err){
-      console.log(err);
-    }
-  })
+  fs.copyFileSync("defaultconfig.json", "config.json");
 }
 
 

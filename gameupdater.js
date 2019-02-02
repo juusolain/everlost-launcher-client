@@ -14,16 +14,7 @@ try {
   configContent = fs.readFileSync("config.json");
   config = JSON.parse(configContent);
 } catch (err) {
-  fs.copyFileSync("defaultconfig.json", "config.json");
-}
-
-
-if(config && config.gameInstallLoc && onfig.gameInstallLoc != "" && config.platform){
-  config.gameInstallLoc = config.gameInstallLoc+path.sep;
-}else{
-  config.gameInstallLoc = __dirname+path.sep;
-  config.preRelease = false;
-  config.platform = process.platform;
+  console.error("Error with reading config.json, please check file permissions")
 }
 
 console.log(config.gameInstallLoc);

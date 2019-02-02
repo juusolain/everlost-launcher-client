@@ -25,7 +25,7 @@ try {
   config.gameInstallLoc = __dirname+path.sep;
   config.preRelease = false;
   config.platform = process.platform;
-  saveSettings();
+  saveSettingsSync();
 }
 if(config.gameInstallLoc != "" && config.platform){
   config.gameInstallLoc = config.gameInstallLoc+path.sep;
@@ -33,7 +33,7 @@ if(config.gameInstallLoc != "" && config.platform){
   config.gameInstallLoc = __dirname+path.sep;
   config.preRelease = false;
   config.platform = process.platform;
-  saveSettings();
+  saveSettingsSync();
 }
 
 const gameUpdater = require("./gameupdater.js");
@@ -412,6 +412,14 @@ function saveSettings(){
     checkForUpdates();
   })
 }
+function saveSettingsSync(){
+  try{
+      fs.writeFileSync("config.json", JSON.stringify(config));
+  } catch (err){
+
+  }
+}
+
 
 function selectInstallLoc(){
   var fileChooser = document.getElementById('installLocSelect');

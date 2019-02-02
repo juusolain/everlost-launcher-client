@@ -12,14 +12,25 @@ var installLoc = "";
 var updateInterval = null;
 var currentUserName;
 const download = require('download');
+const path = require('path').
 const fs = require('fs');
 const unzip = require('unzipper');
-var configContent = fs.readFileSync("config.json");
-const config = JSON.parse(configContent);
+var configContent;
+var config;
+try {
+  configContent = fs.readFileSync("config.json");
+  config = JSON.parse(configContent);
+} catch (err) {
+  fs.copyFile("defaultconfig.json", "config.json", (err)=>{
+    if(err){
+      console.log(err);
+    }
+  })
+}
 if(config.gameInstallLoc != "" && config.platform){
-  config.gameInstallLoc = config.gameInstallLoc+"/";
+  config.gameInstallLoc = config.gameInstallLoc+path.sep;
 }else{
-  config.gameInstallLoc = __dirname+"/"
+  config.gameInstallLoc = __dirname+path.sep;
   config.preRelease = false;
   config.platform = process.platform;
 }
@@ -119,9 +130,9 @@ function getUserdata(cb){
 function getUserIcon(usernameToGet, cb){
   request.get({url: serverUrl+"getusericon", form: {username: usernameToGet}, encoding: null, timeout: 5000}, (err,httpResponse,body)=>{
     if(!err && body){
-      fs.writeFile("cache/icon/"+usernameToGet+".png", body, (err)=>{
+      fs.writeFile("cache"+path.sep+"icon"+path.sep+usernameToGet+".png", body, (err)=>{
         if(!err){
-          cb(true, "cache/icon/"+usernameToGet+".png");
+          cb(true, "cache"+path.sep+"icon"+path.sep+usernameToGet+".png");
         }else{
           cb(false);
           console.log(err);
@@ -192,7 +203,7 @@ function setToMain(){
   getUserdata((success)=>{
     if(success){
       var versionDisplay = document.getElementById("version");
-      fs.readFile(config.gameInstallLoc+'Game/version.txt', 'utf8', (fileErr, data) => {
+      fs.readFile(config.gameInstallLoc+'Game'+path.sep+'version.txt', 'utf8', (fileErr, data) => {
         if(!fileErr){
           versionDisplay.textContent = data;
         }
@@ -247,7 +258,7 @@ function launch(){
   }else{
     launchOpts = ["mainmenu", "-username="+currentUserName, "-token="+token];
   }
-  const game = execFile(config.gameInstallLoc+"Game/Everlost.exe", launchOpts, {detached: true});
+  const game = execFile(config.gameInstallLoc+"Game"+path.sep+"Everlost.exe", launchOpts, {detached: true});
   toggleLaunch(false);
   game.on("close", ()=>{
     toggleLaunch(true);
@@ -343,7 +354,7 @@ function gameIsUpdated(bUpdated, version){
   var updatebutton= document.getElementById("updatebutton");
   var versionDisplay = document.getElementById("version");
   if(bUpdated){
-    versionDisplay.textContent = version;
+    versionDisplay.textContent = "Game: "+version;
   }
   updatebutton.style.display = "none";
   updating.style.display = "none";
@@ -353,7 +364,7 @@ function gameIsUpdated(bUpdated, version){
   launchbutton.style.display = "block";
   loadingBar.style.display = "none";
   if(bUpdated){
-    fs.writeFile(config.gameInstallLoc+'Game/version.txt', version, (err)=>{
+    fs.writeFile(config.gameInstallLoc+'Game'+path.sep+'version.txt', version, (err)=>{
       console.log(err);
     });
   }

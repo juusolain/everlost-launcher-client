@@ -4,15 +4,28 @@ https.globalAgent.options.ca = require('ssl-root-cas/latest').create();
 const serverUrl = "https://everlost.jusola.cf/";
 const download = require('download');
 const fs = require('fs');
+const path = require('path');
 const md5File = require("md5-file")
 const CryptoJS = require('crypto-js');
 const unzip = require('unzipper');
-var configContent = fs.readFileSync("config.json");
-var config = JSON.parse(configContent);
-if(config.gameInstallLoc != "" && config.platform){
-  config.gameInstallLoc = config.gameInstallLoc+"\\";
+var configContent;
+var config;
+try {
+  configContent = fs.readFileSync("config.json");
+  config = JSON.parse(configContent);
+} catch (err) {
+  fs.copyFile("defaultconfig.json", "config.json", (err)=>{
+    if(err){
+      console.log(err);
+    }
+  })
+}
+
+
+if(config && config.gameInstallLoc && onfig.gameInstallLoc != "" && config.platform){
+  config.gameInstallLoc = config.gameInstallLoc+path.sep;
 }else{
-  config.gameInstallLoc = __dirname+"/"
+  config.gameInstallLoc = __dirname+path.sep;
   config.preRelease = false;
   config.platform = process.platform;
 }
@@ -26,7 +39,7 @@ exports.checkUpdates = function checkUpdates(cb){
 exports.getUpdates = function getUpdates(cb){
   let currentVersion = null;
   let fullDL = true;
-  fs.readFile(config.gameInstallLoc+"Game/version.txt", 'utf8', (fileErr, data) => {
+  fs.readFile(config.gameInstallLoc+"Game"+path.sep+"version.txt", 'utf8', (fileErr, data) => {
     if(!fileErr){
       currentVersion = parseFloat(data.replace(/[^0-9]/gi, ''));
     }else{

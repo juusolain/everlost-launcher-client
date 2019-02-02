@@ -22,6 +22,10 @@ try {
   config = JSON.parse(configContent);
 } catch (err) {
   fs.copyFileSync("defaultconfig.json", "config.json");
+  config.gameInstallLoc = __dirname+path.sep;
+  config.preRelease = false;
+  config.platform = process.platform;
+  saveSettings();
 }
 if(config.gameInstallLoc != "" && config.platform){
   config.gameInstallLoc = config.gameInstallLoc+path.sep;

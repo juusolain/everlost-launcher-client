@@ -29,9 +29,7 @@ try {
   config.platform = process.platform;
   saveSettingsSync();
 }
-if(config.gameInstallLoc != "" && config.platform){
-  config.gameInstallLoc = config.gameInstallLoc+path.sep;
-}else{
+if(!(config.gameInstallLoc != "" && config.platform)){
   config.gameInstallLoc = __dirname+path.sep;
   config.preRelease = false;
   config.platform = process.platform;

@@ -36,6 +36,8 @@ if(!(config.gameInstallLoc != "" && config.platform)){
   saveSettingsSync();
 }
 
+config.devServerIP = "172.23.189.190"; //Constant IP for dev server - easier testing
+
 const gameUpdater = require("./gameupdater.js");
 
 window.onload = function(){
@@ -220,7 +222,7 @@ function setToMain(){
       var settingsModal = document.getElementById('settingsModal');
       updateInterval = setInterval(()=>{
         checkUpdates();
-      }, 60000);
+      }, 300000);
       checkUpdates();
       getUserIcon(currentUserName, (done, loc)=>{
         if(done){
@@ -236,12 +238,15 @@ function setToMain(){
 
 }
 
-function checkUpdates(){
+function checkUpdates(cb){
   gameUpdater.getUpdates((avail, urls, size, version)=>{
     if(avail){
       setToUpdate(version);
     }else{
       gameIsUpdated(false, version);
+    }
+    if(cb){
+      cb(avail);
     }
   })
 
@@ -255,16 +260,21 @@ function quitPress(){
 function launch(){
   let launchOpts;
   if(config.devServer){
-    launchOpts = ["172.23.189.179//Game/Map/Planet/Planet?Name="+currentUserName, "-username="+currentUserName, "-token="+token];
+    launchOpts = [config.devServerIP+"//Game/Map/Planet/Planet?Name="+currentUserName, "-username="+currentUserName, "-token="+token];
   }else{
     launchOpts = ["mainmenu", "-username="+currentUserName, "-token="+token];
   }
-  const game = execFile(config.gameInstallLoc+"Game"+path.sep+"Everlost.exe", launchOpts, {detached: true});
-  toggleLaunch(false);
-  game.on("close", ()=>{
-    toggleLaunch(true);
-    console.log("Game closed");
-  });
+  checkUpdates((updateNeeded)=>{
+    if(!updateNeeded){
+      const game = execFile(config.gameInstallLoc+"Game"+path.sep+"Everlost.exe", launchOpts, {detached: true});
+      toggleLaunch(false);
+      game.on("close", ()=>{
+        toggleLaunch(true);
+        console.log("Game closed");
+      });
+    }
+  })
+
 }
 
 function toggleLaunch(bool){

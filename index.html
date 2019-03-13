@@ -34,12 +34,12 @@
           <br>
           <input type="password" id="password_R" class="inputbox" placeholder="Password">
           <br>
-          <p>By registering you acknowledge our <a href="privacypolicy.html" target="_blank">Privacy Policy</a></p>
-          <br>
           <button onclick="registerAccount()" class="button" value="Create account"><a>Create account</a></button>
           <br>
           <div class="linkarea">
             <a onclick="setToLogin()" class="customlink" href="javascript:void(0);">I already have an account</a>
+            <br>
+            <p style="font-size: 14px; text-align: left; display: inline; margin: 0.5%;">By registering you acknowledge our </p><a id="privacypolicy_link" class="customlink" href="javascript:void(0);" onclick="window.open('privacypolicy.html');" target="_blank">Privacy Policy</a>
           </div>
           <p id="accountnoavail" class="errormsg" style="display: none">An account with that username or email already exists</p>
           <p id="servererr_R" class="errormsg" style="display: none">Internal server error, please try again</p>

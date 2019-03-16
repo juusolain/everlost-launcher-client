@@ -237,7 +237,7 @@ function quitPress(){
 function launch(){
   let launchOpts;
   if(config.devServer){
-    launchOpts = ["172.23.189.179//Game/Map/Planet/Planet?Name="+currentUserName, "-username="+currentUserName, "-token="+token];
+    launchOpts = ["172.23.189.190//Game/Map/Planet/Planet?Name="+currentUserName, "-username="+currentUserName, "-token="+token];
   }else{
     launchOpts = ["mainmenu", "-username="+currentUserName, "-token="+token];
   }

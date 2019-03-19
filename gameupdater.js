@@ -19,16 +19,16 @@ try {
 
 console.log(config.gameInstallLoc);
 exports.checkUpdates = function checkUpdates(cb){
+  aTag.split(".");
   console.warn("Deprecated, use gameupdater.getUpdates instead");
 }
 
 
 exports.getUpdates = function getUpdates(cb){
   let currentVersion = null;
-  let fullDL = true;
   fs.readFile(config.gameInstallLoc+"Game"+path.sep+"version.txt", 'utf8', (fileErr, data) => {
     if(!fileErr){
-      currentVersion = parseFloat(data.replace(/[^0-9]/gi, ''));
+      currentVersion = data;
     }else{
       currentVersion = -1;
     }
@@ -53,15 +53,11 @@ exports.getUpdates = function getUpdates(cb){
         parsedBody = parsedBody.sort((a, b)=>{
           let aTag = a.tag_name;
           let bTag = b.tag_name;
-          aTag = aTag.replace(/[^0-9]/gi, '');
-          bTag = bTag.replace(/[^0-9]/gi, '');
-          return parseFloat(aTag)-parseFloat(bTag);
+          return versionSort(aTag, bTag);
         })
         parsedBody = parsedBody.filter((a)=>{
           let aTag = a.tag_name;
-          aTag = aTag.replace(/[^0-9]/gi, '');
-          aTag = parseFloat(aTag);
-          if(aTag > currentVersion){
+          if(versionSort(aTag, currentVersion) > 0){
             return true;
           }else{
             return false;
@@ -69,11 +65,12 @@ exports.getUpdates = function getUpdates(cb){
         });
         if (parsedBody.length > 0){
           parsedBody.forEach((elem)=>{
-            if(currentVersion == parseFloat(elem.tag_name.replace(/[^0-9]/gi, ''))){
+            if(currentVersion == elem.tag_name){
               fullDL = false;
             }
           })
         }else{
+          let fullDL = true;
           cb(false);
           return;
         }
@@ -83,6 +80,7 @@ exports.getUpdates = function getUpdates(cb){
             let parsedBody2 = JSON.parse(body);
             parsedBody2 = parsedBody2.filter((elem)=>{
                 if(elem.name.toLowerCase().includes(config.platform.toLowerCase())){
+                  if(!elem.name.toLowerCase().includes("update")){
                   if(!fullDL){
                     if(elem.name.toLowerCase().includes("update")){
                       return true;
@@ -90,7 +88,6 @@ exports.getUpdates = function getUpdates(cb){
                       return false;
                     }
                   }else{
-                    if(!elem.name.toLowerCase().includes("update")){
                       return true;
                     }else{
                       return false;
@@ -101,7 +98,7 @@ exports.getUpdates = function getUpdates(cb){
                   return false;
                 }
             });
-            if((currentVersion != parseFloat(parsedBody[parsedBody.length-1].tag_name.replace(/[^0-9]/gi, ''))) || fileErr){
+            if((currentVersion != parsedBody[parsedBody.length-1].tag_name) || fileErr){
               let totalSize = 0;
               let downloadUrls = [];
               parsedBody2.forEach((elem)=>{
@@ -235,7 +232,27 @@ function getChecksums(cb){ //Get checksums of all releases
   })
 }
 
+exports.versionSort = function versionSort(version1, version2){
+  version1 = version1.replace(/[^.0-9]/gi, '');
+  version2 = version2.replace(/[^.0-9]/gi, '');
 
+  version1_A = version1.split(".");
+  version2_A = version2.split(".");
+  var resolved = false;
+  if(version1_A.length == version2_A.length){
+    for(var i=0; i < version1_A.length; i++){
+      if(version1_A[i] != version2_A[i]){
+        resolved = true;
+        return version1_A[i] - version2_A[i];
+      }
+    }
+    if(!resolved){
+      return 0;
+    }
+  }else{
+    return 0;
+  }
+}
 
 
 function getKeyForValue(object, value) {

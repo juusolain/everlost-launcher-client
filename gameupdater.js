@@ -26,6 +26,7 @@ exports.checkUpdates = function checkUpdates(cb){
 
 exports.getUpdates = function getUpdates(cb){
   let currentVersion = null;
+  fullDL = true;
   fs.readFile(config.gameInstallLoc+"Game"+path.sep+"version.txt", 'utf8', (fileErr, data) => {
     if(!fileErr){
       currentVersion = data;
@@ -57,6 +58,7 @@ exports.getUpdates = function getUpdates(cb){
         })
         parsedBody = parsedBody.filter((a)=>{
           let aTag = a.tag_name;
+          console.log(versionSort(aTag, currentVersion));
           if(versionSort(aTag, currentVersion) > 0){
             return true;
           }else{
@@ -66,7 +68,7 @@ exports.getUpdates = function getUpdates(cb){
         if (parsedBody.length > 0){
           parsedBody.forEach((elem)=>{
             if(currentVersion == elem.tag_name){
-              fullDL = false;
+              //fullDL = false;
             }
           })
         }else{
@@ -74,29 +76,23 @@ exports.getUpdates = function getUpdates(cb){
           cb(false);
           return;
         }
-        console.log(parsedBody);
         request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases/"+parsedBody[parsedBody.length-1].id+"/assets", (err, httpR, body)=>{
           if(!err && body){
             let parsedBody2 = JSON.parse(body);
             parsedBody2 = parsedBody2.filter((elem)=>{
                 if(elem.name.toLowerCase().includes(config.platform.toLowerCase())){
-                  if(!elem.name.toLowerCase().includes("update")){
-                  if(!fullDL){
-                    if(elem.name.toLowerCase().includes("update")){
-                      return true;
-                    }else{
+                  if(elem.name.toLowerCase().includes("update")){
+                    if(fullDL){
                       return false;
-                    }
-                  }else{
-                      return true;
                     }else{
-                      return false;
+                      return true;
                     }
-                  }
-                  return true;
                 }else{
-                  return false;
+                  return true;
                 }
+              }else{
+                return false;
+              }
             });
             if((currentVersion != parsedBody[parsedBody.length-1].tag_name) || fileErr){
               let totalSize = 0;
@@ -254,6 +250,27 @@ exports.versionSort = function versionSort(version1, version2){
   }
 }
 
+function versionSort(version1, version2){
+  version1 = version1.replace(/[^.0-9]/gi, '');
+  version2 = version2.replace(/[^.0-9]/gi, '');
+
+  version1_A = version1.split(".");
+  version2_A = version2.split(".");
+  var resolved = false;
+  if(version1_A.length == version2_A.length){
+    for(var i=0; i < version1_A.length; i++){
+      if(version1_A[i] != version2_A[i]){
+        resolved = true;
+        return version1_A[i] - version2_A[i];
+      }
+    }
+    if(!resolved){
+      return 0;
+    }
+  }else{
+    return 0;
+  }
+}
 
 function getKeyForValue(object, value) {
   let key = Object.keys(object).find((key)=>{

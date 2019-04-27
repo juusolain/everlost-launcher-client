@@ -39,7 +39,7 @@ if(config.gameInstallLoc == null || config.gameInstallLoc == "" || !config.platf
 config.devServerIP = "172.23.189.190"; //Constant IP for dev server - easier testing
 
 const gameUpdater = require("./gameupdater.js");
-
+console.log(gameUpdater);
 window.onload = function(){
   var settingsModal = document.getElementById('settingsModal');
   settingsModal.addEventListener('animationend', function() {

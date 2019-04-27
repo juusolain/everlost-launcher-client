@@ -12,17 +12,31 @@ var installLoc = "";
 var updateInterval = null;
 var currentUserName;
 const download = require('download');
+const path = require('path');
 const fs = require('fs');
 const unzip = require('unzipper');
-var configContent = fs.readFileSync("config.json");
-const config = JSON.parse(configContent);
-if(config.gameInstallLoc != "" && config.platform){
-  config.gameInstallLoc = config.gameInstallLoc+"/";
-}else{
-  config.gameInstallLoc = __dirname+"/"
+var configContent;
+var config;
+try {
+  configContent = fs.readFileSync("config.json");
+  config = JSON.parse(configContent);
+} catch (err) {
+  fs.copyFileSync("defaultconfig.json", "config.json");
+  configContent = fs.readFileSync("config.json");
+  config = JSON.parse(configContent);
+  config.gameInstallLoc = __dirname+path.sep;
   config.preRelease = false;
   config.platform = process.platform;
+  saveSettingsSync();
 }
+if(config.gameInstallLoc == null || config.gameInstallLoc == "" || !config.platform){
+  config.gameInstallLoc = __dirname+path.sep;
+  config.preRelease = false;
+  config.platform = process.platform;
+  saveSettingsSync();
+}
+
+config.devServerIP = "172.23.189.190"; //Constant IP for dev server - easier testing
 
 const gameUpdater = require("./gameupdater.js");
 
@@ -117,11 +131,11 @@ function getUserdata(cb){
 }
 
 function getUserIcon(usernameToGet, cb){
-  request.get({url: serverUrl+"getusericon", form: {username: usernameToGet}, encoding: null}, (err,httpResponse,body)=>{
+  request.get({url: serverUrl+"getusericon", form: {username: usernameToGet}, encoding: null, timeout: 5000}, (err,httpResponse,body)=>{
     if(!err && body){
-      fs.writeFile("cache/icon/"+usernameToGet+".png", body, (err)=>{
+      fs.writeFile("cache"+path.sep+"icon"+path.sep+usernameToGet+".png", body, (err)=>{
         if(!err){
-          cb(true, "cache/icon/"+usernameToGet+".png");
+          cb(true, "cache"+path.sep+"icon"+path.sep+usernameToGet+".png");
         }else{
           cb(false);
           console.log(err);
@@ -137,7 +151,7 @@ function login(){
   var servererr = document.getElementById("servererr_L");
   var password = document.getElementById("password_L").value;
   var encryptedPW = CryptoJS.SHA256(password).toString();
-  request.get({url: serverUrl+"login", form: {login: login, password: encryptedPW}}, (err,httpResponse,body)=>{
+  request.get({url: serverUrl+"login", form: {login: login, password: encryptedPW, timeout: 5000}}, (err,httpResponse,body)=>{
     if(!err){
       let elembody = JSON.parse(body);
       console.log(elembody);
@@ -158,6 +172,12 @@ function login(){
           servererr.style.display="none";
         }, 7500);
       }
+    }else{
+      console.log(err);
+      servererr.style.display = "block";
+      setTimeout(()=>{
+        servererr.style.display="none";
+      }, 7500);
     }
 
   })
@@ -186,7 +206,7 @@ function setToMain(){
   getUserdata((success)=>{
     if(success){
       var versionDisplay = document.getElementById("version");
-      fs.readFile(config.gameInstallLoc+'Game/version.txt', 'utf8', (fileErr, data) => {
+      fs.readFile(config.gameInstallLoc+'Game'+path.sep+'version.txt', 'utf8', (fileErr, data) => {
         if(!fileErr){
           versionDisplay.textContent = data;
         }
@@ -202,7 +222,7 @@ function setToMain(){
       var settingsModal = document.getElementById('settingsModal');
       updateInterval = setInterval(()=>{
         checkUpdates();
-      }, 60000);
+      }, 300000);
       checkUpdates();
       getUserIcon(currentUserName, (done, loc)=>{
         if(done){
@@ -218,12 +238,15 @@ function setToMain(){
 
 }
 
-function checkUpdates(){
+function checkUpdates(cb){
   gameUpdater.getUpdates((avail, urls, size, version)=>{
     if(avail){
       setToUpdate(version);
     }else{
       gameIsUpdated(false, version);
+    }
+    if(cb){
+      cb(avail);
     }
   })
 
@@ -237,16 +260,21 @@ function quitPress(){
 function launch(){
   let launchOpts;
   if(config.devServer){
-    launchOpts = ["172.23.189.190//Game/Map/Planet/Planet?Name="+currentUserName, "-username="+currentUserName, "-token="+token];
+    launchOpts = [config.devServerIP+"//Game/Map/Planet/Planet?Name="+currentUserName, "-username="+currentUserName, "-token="+token];
   }else{
     launchOpts = ["mainmenu", "-username="+currentUserName, "-token="+token];
   }
-  const game = execFile(config.gameInstallLoc+"Game/Everlost.exe", launchOpts, {detached: true});
-  toggleLaunch(false);
-  game.on("close", ()=>{
-    toggleLaunch(true);
-    console.log("Game closed");
-  });
+  checkUpdates((updateNeeded)=>{
+    if(!updateNeeded){
+      const game = execFile(config.gameInstallLoc+"Game"+path.sep+"Everlost.exe", launchOpts, {detached: true});
+      toggleLaunch(false);
+      game.on("close", ()=>{
+        toggleLaunch(true);
+        console.log("Game closed");
+      });
+    }
+  })
+
 }
 
 function toggleLaunch(bool){
@@ -337,7 +365,7 @@ function gameIsUpdated(bUpdated, version){
   var updatebutton= document.getElementById("updatebutton");
   var versionDisplay = document.getElementById("version");
   if(bUpdated){
-    versionDisplay.textContent = version;
+    versionDisplay.textContent = "Game: "+version;
   }
   updatebutton.style.display = "none";
   updating.style.display = "none";
@@ -347,7 +375,7 @@ function gameIsUpdated(bUpdated, version){
   launchbutton.style.display = "block";
   loadingBar.style.display = "none";
   if(bUpdated){
-    fs.writeFile(config.gameInstallLoc+'Game/version.txt', version, (err)=>{
+    fs.writeFile(config.gameInstallLoc+'Game'+path.sep+'version.txt', version, (err)=>{
       console.log(err);
     });
   }
@@ -391,8 +419,17 @@ function closeSettings(){
 function saveSettings(){
   fs.writeFile("config.json", JSON.stringify(config),(err)=>{
     if(err) console.log(err);
+    checkForUpdates();
   })
 }
+function saveSettingsSync(){
+  try{
+      fs.writeFileSync("config.json", JSON.stringify(config));
+  } catch (err){
+
+  }
+}
+
 
 function selectInstallLoc(){
   var fileChooser = document.getElementById('installLocSelect');

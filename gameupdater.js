@@ -4,31 +4,31 @@ https.globalAgent.options.ca = require('ssl-root-cas/latest').create();
 const serverUrl = "https://everlost.jusola.cf/";
 const download = require('download');
 const fs = require('fs');
+const path = require('path');
 const md5File = require("md5-file")
 const CryptoJS = require('crypto-js');
 const unzip = require('unzipper');
-var configContent = fs.readFileSync("config.json");
-var config = JSON.parse(configContent);
-if(config.gameInstallLoc != "" && config.platform){
-  config.gameInstallLoc = config.gameInstallLoc+"\\";
-}else{
-  config.gameInstallLoc = __dirname+"/"
-  config.preRelease = false;
-  config.platform = process.platform;
+var configContent;
+var config;
+try {
+  configContent = fs.readFileSync("config.json");
+  config = JSON.parse(configContent);
+} catch (err) {
+  console.error("Error with reading config.json, please check file permissions")
 }
 
 console.log(config.gameInstallLoc);
 exports.checkUpdates = function checkUpdates(cb){
+  aTag.split(".");
   console.warn("Deprecated, use gameupdater.getUpdates instead");
 }
 
 
 exports.getUpdates = function getUpdates(cb){
   let currentVersion = null;
-  let fullDL = true;
-  fs.readFile(config.gameInstallLoc+"Game/version.txt", 'utf8', (fileErr, data) => {
+  fs.readFile(config.gameInstallLoc+"Game"+path.sep+"version.txt", 'utf8', (fileErr, data) => {
     if(!fileErr){
-      currentVersion = parseFloat(data.replace(/[^0-9]/gi, ''));
+      currentVersion = data;
     }else{
       currentVersion = -1;
     }
@@ -53,15 +53,11 @@ exports.getUpdates = function getUpdates(cb){
         parsedBody = parsedBody.sort((a, b)=>{
           let aTag = a.tag_name;
           let bTag = b.tag_name;
-          aTag = aTag.replace(/[^0-9]/gi, '');
-          bTag = bTag.replace(/[^0-9]/gi, '');
-          return parseFloat(aTag)-parseFloat(bTag);
+          return versionSort(aTag, bTag);
         })
         parsedBody = parsedBody.filter((a)=>{
           let aTag = a.tag_name;
-          aTag = aTag.replace(/[^0-9]/gi, '');
-          aTag = parseFloat(aTag);
-          if(aTag > currentVersion){
+          if(versionSort(aTag, currentVersion) > 0){
             return true;
           }else{
             return false;
@@ -69,19 +65,22 @@ exports.getUpdates = function getUpdates(cb){
         });
         if (parsedBody.length > 0){
           parsedBody.forEach((elem)=>{
-            if(currentVersion == parseFloat(elem.tag_name.replace(/[^0-9]/gi, ''))){
+            if(currentVersion == elem.tag_name){
               fullDL = false;
             }
           })
         }else{
+          let fullDL = true;
           cb(false);
           return;
         }
-        request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases/"+parsedBody[0].id+"/assets", (err, httpR, body)=>{
+        console.log(parsedBody);
+        request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases/"+parsedBody[parsedBody.length-1].id+"/assets", (err, httpR, body)=>{
           if(!err && body){
             let parsedBody2 = JSON.parse(body);
             parsedBody2 = parsedBody2.filter((elem)=>{
                 if(elem.name.toLowerCase().includes(config.platform.toLowerCase())){
+                  if(!elem.name.toLowerCase().includes("update")){
                   if(!fullDL){
                     if(elem.name.toLowerCase().includes("update")){
                       return true;
@@ -89,7 +88,6 @@ exports.getUpdates = function getUpdates(cb){
                       return false;
                     }
                   }else{
-                    if(!elem.name.toLowerCase().includes("update")){
                       return true;
                     }else{
                       return false;
@@ -100,7 +98,7 @@ exports.getUpdates = function getUpdates(cb){
                   return false;
                 }
             });
-            if((currentVersion != parseFloat(parsedBody[0].tag_name.replace(/[^0-9]/gi, ''))) || fileErr){
+            if((currentVersion != parsedBody[parsedBody.length-1].tag_name) || fileErr){
               let totalSize = 0;
               let downloadUrls = [];
               parsedBody2.forEach((elem)=>{
@@ -108,9 +106,10 @@ exports.getUpdates = function getUpdates(cb){
                 downloadUrls.unshift(elem.browser_download_url);
               })
               if(fullDL){
-                cb(true, [parsedBody2[0].browser_download_url], parsedBody2[0].size, parsedBody[0].tag_name);
+
+                cb(true, [parsedBody2[parsedBody2.length-1].browser_download_url], parsedBody2[parsedBody2.length-1].size, parsedBody[parsedBody.length-1].tag_name);
               }else{
-                cb(true, downloadUrls, totalSize, parsedBody[0].tag_name);
+                cb(true, downloadUrls, totalSize, parsedBody[parsedBody.length-1].tag_name);
               }
             }else{
               cb(false);
@@ -233,7 +232,27 @@ function getChecksums(cb){ //Get checksums of all releases
   })
 }
 
+exports.versionSort = function versionSort(version1, version2){
+  version1 = version1.replace(/[^.0-9]/gi, '');
+  version2 = version2.replace(/[^.0-9]/gi, '');
 
+  version1_A = version1.split(".");
+  version2_A = version2.split(".");
+  var resolved = false;
+  if(version1_A.length == version2_A.length){
+    for(var i=0; i < version1_A.length; i++){
+      if(version1_A[i] != version2_A[i]){
+        resolved = true;
+        return version1_A[i] - version2_A[i];
+      }
+    }
+    if(!resolved){
+      return 0;
+    }
+  }else{
+    return 0;
+  }
+}
 
 
 function getKeyForValue(object, value) {

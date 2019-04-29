@@ -357,6 +357,7 @@ p{
 .titlebar{
   -webkit-app-region: no-drag;
   float: right;
+  z-index: 1;
 }
 
 
@@ -369,9 +370,11 @@ p{
   float: right;
   height: 28px;
   width: 28px;
+  z-index: 1;
 }
 
 .titlebaricon{
+  z-index: 1;
   padding: 0px;
   margin: 0px;
   float: right;
@@ -380,12 +383,14 @@ p{
 }
 
 .titlebarbuttoncontainer:hover{
+  z-index: 1;
   background-color: #7289DA;
   cursor: pointer;
 }
 
 
 .closesettingsbuttoncontainer{
+  z-index: 1;
   background-color: rgba(0,0,0,.1);
   transition: background-color 0.25s;
   padding: 2px;
@@ -396,6 +401,7 @@ p{
 }
 
 .closesettingsbutton{
+  z-index: 1;
   padding: 2px;
   margin: 0px;
   float: right;
@@ -404,6 +410,7 @@ p{
 }
 
 .closesettingsbuttoncontainer:hover{
+  z-index: 1;
   background-color: #7289DA;
   cursor: pointer;
 }

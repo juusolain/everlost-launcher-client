@@ -47,7 +47,10 @@
       "allowToChangeInstallationDirectory": "true",
       "oneClick": "false",
       "installerIcon": "build/icon.ico"
-    }
+    },
+    "extraFiles": [
+      "defaultconfig.json"
+    ]
   },
   "win": {
     "publish": [

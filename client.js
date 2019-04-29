@@ -17,6 +17,15 @@ const fs = require('fs');
 const unzip = require('unzipper');
 var configContent;
 var config;
+
+var rootdir;
+if(process.env.PORTABLE_EXECUTABLE_DIR){
+  rootdir = process.env.PORTABLE_EXECUTABLE_DIR;
+}else{
+  rootdir = __dirname;
+}
+
+
 try {
   configContent = fs.readFileSync("config.json");
   config = JSON.parse(configContent);
@@ -24,21 +33,18 @@ try {
   fs.copyFileSync("defaultconfig.json", "config.json");
   configContent = fs.readFileSync("config.json");
   config = JSON.parse(configContent);
-  config.gameInstallLoc = __dirname+path.sep;
+  config.gameInstallLoc = rootdir+path.sep+"Game"+path.sep;
+  saveSettingsSync();
+}
+if(config.gameInstallLoc == null || !config.platform){
+  config.gameInstallLoc = rootdir+path.sep+"Game"+path.sep;
   config.preRelease = false;
   config.platform = process.platform;
   saveSettingsSync();
 }
-if(config.gameInstallLoc == null || config.gameInstallLoc == "" || !config.platform){
-  config.gameInstallLoc = __dirname+path.sep;
-  config.preRelease = false;
-  config.platform = process.platform;
-  saveSettingsSync();
-}
-
 config.devServerIP = "172.23.189.190"; //Constant IP for dev server - easier testing
-
 const gameUpdater = require("./gameupdater.js");
+
 console.log(gameUpdater);
 window.onload = function(){
   var settingsModal = document.getElementById('settingsModal');
@@ -133,14 +139,38 @@ function getUserdata(cb){
 function getUserIcon(usernameToGet, cb){
   request.get({url: serverUrl+"getusericon", form: {username: usernameToGet}, encoding: null, timeout: 5000}, (err,httpResponse,body)=>{
     if(!err && body){
-      fs.writeFile("cache"+path.sep+"icon"+path.sep+usernameToGet+".png", body, (err)=>{
-        if(!err){
-          cb(true, "cache"+path.sep+"icon"+path.sep+usernameToGet+".png");
+      fs.stat(rootdir+path.sep+"cache"+path.sep+"icon", (dirNotExist)=>{
+        if(dirNotExist){
+          fs.mkdir(rootdir+path.sep+"cache", { recursive: true }, (err2) => {
+            if(err2){
+              console.log(err2);
+            }
+            fs.mkdir(rootdir+path.sep+"cache"+path.sep+"icon", { recursive: true }, (err3) => {
+              if(err3){
+                console.log(err3);
+              }
+              fs.writeFile(rootdir+path.sep+"cache"+path.sep+"icon"+path.sep+usernameToGet+".png", body, (err)=>{
+                if(!err){
+                  cb(true, rootdir+path.sep+"cache"+path.sep+"icon"+path.sep+usernameToGet+".png");
+                }else{
+                  console.log(err);
+                  cb(false);
+                }
+              });
+            });
+          });
         }else{
-          cb(false);
-          console.log(err);
+          fs.writeFile(rootdir+path.sep+"cache"+path.sep+"icon"+path.sep+usernameToGet+".png", body, (err)=>{
+            if(!err){
+              cb(true, rootdir+path.sep+"cache"+path.sep+"icon"+path.sep+usernameToGet+".png");
+            }else{
+              console.log(err);
+              cb(false);
+            }
+          })
         }
       })
+
     }
   })
 }

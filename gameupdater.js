@@ -16,13 +16,21 @@ try {
 } catch (err) {
   console.error("Error with reading config.json, please check file permissions")
 }
+var rootdir;
 
-console.log(config.gameInstallLoc);
+console.log(process.env.PORTABLE_EXECUTABLE_DIR);
+console.log(__dirname);
+
 exports.checkUpdates = function checkUpdates(cb){
   aTag.split(".");
   console.warn("Deprecated, use gameupdater.getUpdates instead");
 }
 
+if(process.env.PORTABLE_EXECUTABLE_DIR){
+  rootdir = process.env.PORTABLE_EXECUTABLE_DIR;
+}else{
+  rootdir = __dirname;
+}
 
 exports.getUpdates = function getUpdates(cb){
   let currentVersion = null;
@@ -31,7 +39,8 @@ exports.getUpdates = function getUpdates(cb){
     if(!fileErr){
       currentVersion = data;
     }else{
-      currentVersion = -1;
+      console.log("New install");
+      currentVersion = "v0.0.0";
     }
     request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases", (err, httpResponse, body)=>{
       if(!err){
@@ -58,6 +67,8 @@ exports.getUpdates = function getUpdates(cb){
         })
         parsedBody = parsedBody.filter((a)=>{
           let aTag = a.tag_name;
+          console.log(aTag);
+          console.log(currentVersion);
           console.log(versionSort(aTag, currentVersion));
           if(versionSort(aTag, currentVersion) > 0){
             return true;
@@ -112,13 +123,13 @@ exports.getUpdates = function getUpdates(cb){
             }
 
           }else{
-            cb(false);
             console.log(err);
+            cb(false);
           }
         })
       }else{
-        cb(false);
         console.log(err);
+        cb(false);
       }
     })
   });

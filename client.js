@@ -39,7 +39,7 @@ try {
 if(config.gameInstallLoc == null || !config.platform){
   config.gameInstallLoc = rootdir+path.sep;
   config.preRelease = false;
-  config.platform = process.platform;
+  config.platform = "Win64";
   saveSettingsSync();
 }
 config.devServerIP = "172.23.189.190"; //Constant IP for dev server - easier testing

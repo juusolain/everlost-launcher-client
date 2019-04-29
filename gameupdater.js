@@ -34,9 +34,9 @@ if(process.env.PORTABLE_EXECUTABLE_DIR){
 
 exports.getUpdates = function getUpdates(cb){
   try{
-      fs.mkdirSync(config.gameInstallLoc+"Game", {recursive: true});
+    fs.mkdirSync(config.gameInstallLoc+"Game", {recursive: true});
   }catch(err){
-    console.log("GameinstallLoc already exists");
+    console.log("GameinstallLoc already exists, poss-err: "+err);
   }
   let currentVersion = null;
   fullDL = true;

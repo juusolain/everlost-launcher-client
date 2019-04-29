@@ -37,7 +37,7 @@ html {
 
 #dragArea{
   -webkit-app-region: drag;
-  width: 100%;
+  width: 95%;
   position: absolute;
   display: inline;
   height: 40px;
@@ -374,6 +374,7 @@ p{
 }
 
 .titlebaricon{
+  -webkit-app-region: no-drag;
   z-index: 1;
   padding: 0px;
   margin: 0px;
@@ -383,6 +384,7 @@ p{
 }
 
 .titlebarbuttoncontainer:hover{
+  -webkit-app-region: no-drag;
   z-index: 1;
   background-color: #7289DA;
   cursor: pointer;

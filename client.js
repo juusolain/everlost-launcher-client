@@ -17,7 +17,7 @@ const fs = require('fs');
 const unzip = require('unzipper');
 var configContent;
 var config;
-
+var gameRunning = false;
 var rootdir;
 if(process.env.PORTABLE_EXECUTABLE_DIR){
   rootdir = process.env.PORTABLE_EXECUTABLE_DIR;
@@ -294,16 +294,26 @@ function launch(){
   }else{
     launchOpts = ["mainmenu", "-username="+currentUserName, "-token="+token];
   }
-  checkUpdates((updateNeeded)=>{
-    if(!updateNeeded){
-      const game = execFile(config.gameInstallLoc+"Game"+path.sep+"Everlost.exe", launchOpts, {detached: true});
-      toggleLaunch(false);
-      game.on("close", ()=>{
+  if(!gameRunning){
+    toggleLaunch(false);
+    gameRunning = true;
+    checkUpdates((updateNeeded)=>{
+      if(!updateNeeded){
+        toggleLaunch(false);
+        gameRunning = true;
+        const game = execFile(config.gameInstallLoc+"Game"+path.sep+"Everlost.exe", launchOpts, {detached: true});
+        game.on("close", ()=>{
+          gameRunning = false;
+          toggleLaunch(true);
+          console.log("Game closed");
+        });
+      }else{
+        gameRunning = false;
         toggleLaunch(true);
-        console.log("Game closed");
-      });
-    }
-  })
+      }
+    })
+  }
+
 
 }
 
@@ -386,7 +396,10 @@ function updateGame(urls ,size, toVersion){
 }
 
 function gameIsUpdated(bUpdated, version){
-  var launchbutton = document.getElementById("launchbutton");
+  if(!gameRunning){
+    var launchbutton = document.getElementById("launchbutton");
+    launchbutton.style.display = "block";
+  }
   var updatecheck = document.getElementById("updatecheck");
   var updatebar = document.getElementById("updatebar");
   var progress = document.getElementById("updateprogress");
@@ -402,7 +415,7 @@ function gameIsUpdated(bUpdated, version){
   progress.style.display = "none";
   updatebar.style.display = "none";
   updatecheck.style.display = "none";
-  launchbutton.style.display = "block";
+
   loadingBar.style.display = "none";
   if(bUpdated){
     fs.writeFile(config.gameInstallLoc+'Game'+path.sep+'version.txt', version, (err)=>{

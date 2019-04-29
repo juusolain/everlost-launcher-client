@@ -33,11 +33,11 @@ try {
   fs.copyFileSync("defaultconfig.json", "config.json");
   configContent = fs.readFileSync("config.json");
   config = JSON.parse(configContent);
-  config.gameInstallLoc = rootdir+path.sep+"Game"+path.sep;
+  config.gameInstallLoc = rootdir+path.sep;
   saveSettingsSync();
 }
 if(config.gameInstallLoc == null || !config.platform){
-  config.gameInstallLoc = rootdir+path.sep+"Game"+path.sep;
+  config.gameInstallLoc = rootdir+path.sep;
   config.preRelease = false;
   config.platform = process.platform;
   saveSettingsSync();
@@ -235,6 +235,7 @@ function setToMain(){
   loadingBar.style.display = "none";
   getUserdata((success)=>{
     if(success){
+      checkUpdates();
       var versionDisplay = document.getElementById("version");
       fs.readFile(config.gameInstallLoc+'Game'+path.sep+'version.txt', 'utf8', (fileErr, data) => {
         if(!fileErr){
@@ -253,7 +254,6 @@ function setToMain(){
       updateInterval = setInterval(()=>{
         checkUpdates();
       }, 300000);
-      checkUpdates();
       getUserIcon(currentUserName, (done, loc)=>{
         if(done){
           currentusericon.src=loc;

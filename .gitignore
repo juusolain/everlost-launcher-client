@@ -5,3 +5,4 @@ yarn.lock
 Game/
 Download/
 config.json
+cache/*

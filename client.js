@@ -19,12 +19,14 @@ var configContent;
 var config;
 var gameRunning = false;
 var rootdir;
-if(process.env.PORTABLE_EXECUTABLE_DIR){
+/*if(process.env.PORTABLE_EXECUTABLE_DIR){
   rootdir = process.env.PORTABLE_EXECUTABLE_DIR;
 }else{
   rootdir = __dirname;
-}
+}*/
+rootdir = require('electron-root-path').rootPath;
 
+console.log(rootdir);
 
 try {
   configContent = fs.readFileSync("config.json");
@@ -469,7 +471,7 @@ function saveSettingsSync(){
   try{
       fs.writeFileSync("config.json", JSON.stringify(config));
   } catch (err){
-
+    console.log("Error: "+err);
   }
 }
 

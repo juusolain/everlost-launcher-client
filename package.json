@@ -15,15 +15,18 @@
   "license": "SEE LICENSE IN ../../EULA.txt",
   "devDependencies": {
     "electron": "^3.0.10",
-    "electron-builder": "^20.38.3"
+    "electron-builder": "^20.40.2"
   },
   "dependencies": {
+    "ajv": "^6.10.0",
     "child_process": "^1.0.2",
     "crypto-js": "^3.1.9-1",
     "download": "^7.1.0",
     "electron-dl": "^1.12.0",
     "electron-log": "^2.2.17",
+    "electron-root-path": "^1.0.9",
     "electron-updater": "^4.0.5",
+    "eslint": "^5.16.0",
     "md5-file": "^4.0.0",
     "node-stream-zip": "^1.7.0",
     "request": "^2.88.0",

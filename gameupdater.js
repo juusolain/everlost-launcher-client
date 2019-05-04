@@ -40,7 +40,7 @@ exports.getUpdates = function getUpdates(cb){
   }
   let currentVersion = null;
   fullDL = true;
-  fs.readFile(config.gameInstallLoc+"Game"+path.sep+"version.txt", 'utf8', (fileErr, data) => {
+  fs.readFile(config.gameInstallLoc+"EverlostGame"+path.sep+"version.txt", 'utf8', (fileErr, data) => {
     if(!fileErr){
       currentVersion = data;
     }else{
@@ -65,6 +65,11 @@ exports.getUpdates = function getUpdates(cb){
             }
           }
         });
+        console.log(parsedBody);
+        if(parsedBody.length == 0){
+          cb(false, null, null, null, "No available updates");
+          return;
+        }
         parsedBody = parsedBody.sort((a, b)=>{
           let aTag = a.tag_name;
           let bTag = b.tag_name;
@@ -129,12 +134,12 @@ exports.getUpdates = function getUpdates(cb){
 
           }else{
             console.log(err);
-            cb(false);
+            cb(false, null, null, null, err);
           }
         })
       }else{
         console.log(err);
-        cb(false);
+        cb(false, null, null, null, err);
       }
     })
   });
@@ -149,7 +154,7 @@ exports.updateGame = function updateGame(urls, size, version, cb, onProgress){
   let downloadArr = function(cbDLArr){
     console.log("Downloading: "+urls[currentItem]);
     let currentdl = download(urls[currentItem]);
-    currentdl.pipe(unzip.Extract({ path: config.gameInstallLoc+'Game' }));
+    currentdl.pipe(unzip.Extract({ path: config.gameInstallLoc+'EverlostGame' }));
     currentdl.on('downloadProgress', (progress)=>{
       let progressPercent = (progress.transferred+totalProgress) / size * 100 + "%";
       let progressPercentDisplay = ((progress.transferred+totalProgress) / size * 100).toFixed(0) + "%";

@@ -239,7 +239,7 @@ function setToMain(){
     if(success){
       checkUpdates();
       var versionDisplay = document.getElementById("version");
-      fs.readFile(config.gameInstallLoc+'Game'+path.sep+'version.txt', 'utf8', (fileErr, data) => {
+      fs.readFile(config.gameInstallLoc+'EverlostGame'+path.sep+'version.txt', 'utf8', (fileErr, data) => {
         if(!fileErr){
           versionDisplay.textContent = data;
         }
@@ -271,15 +271,21 @@ function setToMain(){
 }
 
 function checkUpdates(cb){
-  gameUpdater.getUpdates((avail, urls, size, version)=>{
-    if(avail){
-      setToUpdate(version);
+  gameUpdater.getUpdates((avail, urls, size, version, netError)=>{
+    if(!netError){
+      if(avail){
+        setToUpdate(version);
+      }else{
+        gameIsUpdated(false, version);
+      }
+
+      if(cb){
+        cb(avail);
+      }
     }else{
-      gameIsUpdated(false, version);
+      setToNoConn_UpdateServer();
     }
-    if(cb){
-      cb(avail);
-    }
+
   })
 
 }
@@ -303,7 +309,7 @@ function launch(){
       if(!updateNeeded){
         toggleLaunch(false);
         gameRunning = true;
-        const game = execFile(config.gameInstallLoc+"Game"+path.sep+"Everlost.exe", launchOpts, {detached: true});
+        const game = execFile(config.gameInstallLoc+"EverlostGame"+path.sep+"Everlost.exe", launchOpts, {detached: true});
         game.on("close", ()=>{
           gameRunning = false;
           toggleLaunch(true);
@@ -334,19 +340,10 @@ function toggleLaunch(bool){
 
 
 function setToUpdate(version){
-  var launchbutton = document.getElementById("launchbutton");
-  var updatecheck = document.getElementById("updatecheck");
-  var updatebar = document.getElementById("updatebar");
-  var progress = document.getElementById("updateprogress");
+  clearMainState();
   var updating = document.getElementById("updating");
-  var loadingBar = document.getElementById("loadingbar");
   var updatebutton= document.getElementById("updatebutton");
   updating.style.display = "block";
-  progress.style.display = "none";
-  updatebar.style.display = "none";
-  updatecheck.style.display = "none";
-  launchbutton.style.display = "none";
-  loadingBar.style.display = "none";
   updatebutton.style.display = "block";
   updating.textContent = "Update available: "+version;
 }
@@ -368,6 +365,7 @@ function updatePressed(){
 }
 
 function updateGame(urls ,size, toVersion){
+  clearMainState();
   var updateButton = document.getElementById("updatebutton");
   var updatebar = document.getElementById("updatebar");
   var progressText = document.getElementById("updateprogress");
@@ -398,29 +396,17 @@ function updateGame(urls ,size, toVersion){
 }
 
 function gameIsUpdated(bUpdated, version){
+  clearMainState();
   if(!gameRunning){
     var launchbutton = document.getElementById("launchbutton");
     launchbutton.style.display = "block";
   }
-  var updatecheck = document.getElementById("updatecheck");
-  var updatebar = document.getElementById("updatebar");
-  var progress = document.getElementById("updateprogress");
-  var updating = document.getElementById("updating");
-  var loadingBar = document.getElementById("loadingbar");
-  var updatebutton= document.getElementById("updatebutton");
   var versionDisplay = document.getElementById("version");
   if(bUpdated){
     versionDisplay.textContent = "Game: "+version;
   }
-  updatebutton.style.display = "none";
-  updating.style.display = "none";
-  progress.style.display = "none";
-  updatebar.style.display = "none";
-  updatecheck.style.display = "none";
-
-  loadingBar.style.display = "none";
   if(bUpdated){
-    fs.writeFile(config.gameInstallLoc+'Game'+path.sep+'version.txt', version, (err)=>{
+    fs.writeFile(config.gameInstallLoc+'EverlostGame'+path.sep+'version.txt', version, (err)=>{
       console.log(err);
     });
   }
@@ -488,4 +474,29 @@ function installLocChanged(){
   var gameinstall = document.getElementById('settings-installloc');
   gameinstall.textContent = config.gameInstallLoc;
   saveSettings();
+}
+
+function setToNoConn_UpdateServer(){
+  clearMainState()
+  var noconnError  = document.getElementById("noconn_updateserver")
+  noconnError.style.display = "block";
+}
+
+function clearMainState(){
+  var launchbutton = document.getElementById("launchbutton");
+  var updatecheck = document.getElementById("updatecheck");
+  var updatebar = document.getElementById("updatebar");
+  var progress = document.getElementById("updateprogress");
+  var loadingBar = document.getElementById("loadingbar");
+  var updatebutton= document.getElementById("updatebutton");
+  var noconnError  = document.getElementById("noconn_updateserver")
+  var updating = document.getElementById("updating");
+  updatecheck.style.display = "none";
+  updatebar.style.display = "none";
+  updating.style.display = "none";
+  progress.style.display = "none";
+  launchbutton.style.display = "none";
+  loadingBar.style.display = "none";
+  updatebutton.style.display = "none";
+  noconnError.style.display = "none";
 }

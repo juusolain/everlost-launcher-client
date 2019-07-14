@@ -5,7 +5,7 @@ const request = require('request');
 const https = require('https');
 var CryptoJS = require("crypto-js");
 https.globalAgent.options.ca = require('ssl-root-cas/latest').create();
-const serverUrl = "https://everlost.jusola.cf/server";
+const serverUrl = "https://everlost.jusola.cf/server/";
 const updateFile = "";
 var token = null;
 var installLoc = "";
@@ -183,6 +183,8 @@ function login(){
   var password = document.getElementById("password_L").value;
   var encryptedPW = CryptoJS.SHA256(password).toString();
   request.get({url: serverUrl+"login", form: {login: login, password: encryptedPW, timeout: 5000}}, (err,httpResponse,body)=>{
+    console.log(body);
+    console.log(httpResponse);
     if(!err){
       let elembody = JSON.parse(body);
       console.log(elembody);
@@ -221,7 +223,6 @@ function logout(){
 }
 
 function setToMain(){
-
   var launchbutton = document.getElementById("launchbutton");
   var updatecheck = document.getElementById("updatecheck");
   var updatebar = document.getElementById("updatebar");
@@ -238,11 +239,6 @@ function setToMain(){
     if(success){
       checkUpdates();
       var versionDisplay = document.getElementById("version");
-      fs.readFile(config.gameInstallLoc+'EverlostGame'+path.sep+'version.txt', 'utf8', (fileErr, data) => {
-        if(!fileErr){
-          versionDisplay.textContent = data;
-        }
-      });
 
       var loginscreen = document.getElementById("loginscreen");
       var mainscreen = document.getElementById("mainscreen");
@@ -270,9 +266,11 @@ function setToMain(){
 }
 
 function checkUpdates(cb){
-  gameUpdater.getUpdates((avail, downloads)=>{
+  gameUpdater.getUpdates((avail, downloads, isFull)=>{
     if(avail){
       setToUpdate();
+    }else{
+      gameIsUpdated(true, null);
     }
   })
 
@@ -341,10 +339,30 @@ function setToUpdate(){
 
 function updatePressed(){
   clearInterval(updateInterval);
-  gameUpdater.getUpdates((isAvail, dlList)=>{
+  gameUpdater.getUpdates((isAvail, dlList, needsFull)=>{
     if(isAvail){
+      clearMainState();
+      var updateButton = document.getElementById("updatebutton");
+      var updatebar = document.getElementById("updatebar");
+      var progressText = document.getElementById("updateprogress");
+      var updatecheck = document.getElementById("updatecheck");
+      var loadingBar = document.getElementById("loadingbar");
+      var updating = document.getElementById("updating");
+      updating.style.display = "block";
+      updateButton.style.display = "none";
+      updatecheck.style.display = "none";
+      loadingBar.style.display = "none";
+      progressText.style.display = "block";
+      updatebar.style.display = "block";
+      console.log(version);
+      updating.textContent = "Updating";
       console.log("updategame");
-      updateGame(dlList);
+      gameUpdater.updateGame(dlList, needsFull, ()=>{
+        gameIsUpdated(true, null);
+      }, (uprogress, uprogressdisp)=>{
+          updatebar.style.width = uprogress*100+"%";
+          progressText.textContent = "Downloading: "+(uprogress * 100).toFixed()+"%, "+uprogressdisp;
+        })
     }else{
       console.log("noAvail-UPDATE");
       setToMain();
@@ -352,36 +370,6 @@ function updatePressed(){
   });
 }
 
-function updateGame(urls ,size, toVersion){
-  clearMainState();
-  var updateButton = document.getElementById("updatebutton");
-  var updatebar = document.getElementById("updatebar");
-  var progressText = document.getElementById("updateprogress");
-  var updatecheck = document.getElementById("updatecheck");
-  var loadingBar = document.getElementById("loadingbar");
-  var updating = document.getElementById("updating");
-  updating.style.display = "block";
-  updateButton.style.display = "none";
-  updatecheck.style.display = "none";
-  loadingBar.style.display = "none";
-  progressText.style.display = "block";
-  updatebar.style.display = "block";
-  console.log(version);
-  updating.textContent = "Updating to: "+toVersion;
-  let lastProgress = null;
-  gameUpdater.updateGame(urls, size, toVersion, (complete, version)=>{
-    if(complete){
-      gameIsUpdated(true, version);
-    }
-  }, (uprogress, uprogressdisp)=>{
-
-      updatebar.style.width = uprogress;
-      if (lastProgress != uprogressdisp) {
-        progressText.textContent = "Downloading: "+uprogressdisp;
-      }
-      lastProgress = uprogressdisp;
-  })
-}
 
 function gameIsUpdated(bUpdated, version){
   clearMainState();
@@ -394,9 +382,6 @@ function gameIsUpdated(bUpdated, version){
     versionDisplay.textContent = "Game: "+version;
   }
   if(bUpdated){
-    fs.writeFile(config.gameInstallLoc+'EverlostGame'+path.sep+'version.txt', version, (err)=>{
-      console.log(err);
-    });
   }
 
 }

@@ -36,7 +36,7 @@ exports.getUpdates = function getUpdates(cb){
     fs.readdir(config.gameInstallLoc+path.sep+"Game"+path.sep+"Everlost"+path.sep+"Content", (err, filearr)=>{
       console.log(filearr);
       if(!err){
-        request.get({url: serverUrl+path.sep+"gameupdater"}, (err, httpResponse, body)=>{
+        request.get({url: serverUrl+path.sep+"getupdates"}, (err, httpResponse, body)=>{
           console.log(body);
           console.log(err);
           console.log(httpResponse);

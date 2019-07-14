@@ -38,6 +38,8 @@ exports.getUpdates = function getUpdates(cb){
       if(!err){
         request.get({url: serverUrl+path.sep+"gameupdater"}, (err, httpResponse, body)=>{
           console.log(body);
+          console.log(err);
+          console.log(httpResponse);
         })
       }
     })

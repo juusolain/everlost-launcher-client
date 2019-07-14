@@ -14,7 +14,6 @@ function createWindow() {
 
   win.once('ready-to-show', () => {
     win.show();
-    win.webContents.openDevTools();
   });
 
   //checkForUpdates();

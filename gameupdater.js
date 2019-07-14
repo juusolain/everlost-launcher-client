@@ -33,18 +33,158 @@ if(process.env.PORTABLE_EXECUTABLE_DIR){
 
 exports.getUpdates = function getUpdates(cb){
   try{
+<<<<<<< HEAD
     fs.readdir(config.gameInstallLoc+path.sep+"Game"+path.sep+"Everlost"+path.sep+"Content", (err, filearr)=>{
       console.log(filearr);
       if(!err){
         request.get({url: serverUrl+path.sep+"gameupdater"}, (err, httpResponse, body)=>{
           console.log(body);
         })
+=======
+    fs.mkdirSync(config.gameInstallLoc+"Game", {recursive: true});
+  }catch(err){
+    console.log("GameinstallLoc already exists, poss-err: "+err);
+  }
+  let currentVersion = null;
+  fullDL = true;
+  fs.readFile(config.gameInstallLoc+"EverlostGame"+path.sep+"version.txt", 'utf8', (fileErr, data) => {
+    if(!fileErr){
+      currentVersion = data;
+    }else{
+      console.log("New install");
+      currentVersion = "v0.0.0";
+    }
+    request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases", (err, httpResponse, body)=>{
+      if(!err){
+        let parsedBody = JSON.parse(body);
+        parsedBody = parsedBody.filter((elem)=>{
+          if(config.preRelease){
+            if(elem.target_commitish == "pre-release" || elem.target_commitish == "release"){
+              return true;
+            }else{
+              return false;
+            }
+          }else{
+            if(elem.target_commitish == "release"){
+              return true;
+            }else{
+              return false;
+            }
+          }
+        });
+        console.log(parsedBody);
+        if(parsedBody.length == 0){
+          cb(false, null, null, null, "No available updates");
+          return;
+        }
+        parsedBody = parsedBody.sort((a, b)=>{
+          let aTag = a.tag_name;
+          let bTag = b.tag_name;
+          return versionSort(aTag, bTag);
+        })
+        parsedBody = parsedBody.filter((a)=>{
+          let aTag = a.tag_name;
+          console.log(aTag);
+          console.log(currentVersion);
+          console.log(versionSort(aTag, currentVersion));
+          if(versionSort(aTag, currentVersion) > 0){
+            return true;
+          }else{
+            return false;
+          }
+        });
+        if (parsedBody.length > 0){
+          parsedBody.forEach((elem)=>{
+            if(currentVersion == elem.tag_name){
+              //fullDL = false;
+            }
+          })
+        }else{
+          let fullDL = true;
+          cb(false);
+          return;
+        }
+        request.get("https://git.jusola.cf/api/v1/repos/porkposh/Everlost/releases/"+parsedBody[parsedBody.length-1].id+"/assets", (err, httpR, body)=>{
+          if(!err && body){
+            let parsedBody2 = JSON.parse(body);
+            parsedBody2 = parsedBody2.filter((elem)=>{
+                if(elem.name.toLowerCase().includes(config.platform.toLowerCase())){
+                  if(elem.name.toLowerCase().includes("update")){
+                    if(fullDL){
+                      return false;
+                    }else{
+                      return true;
+                    }
+                }else{
+                  return true;
+                }
+              }else{
+                return false;
+              }
+            });
+            if((currentVersion != parsedBody[parsedBody.length-1].tag_name) || fileErr){
+              let totalSize = 0;
+              let downloadUrls = [];
+              parsedBody2.forEach((elem)=>{
+                totalSize+=elem.size;
+                downloadUrls.unshift(elem.browser_download_url);
+              })
+              if(fullDL){
+
+                cb(true, [parsedBody2[parsedBody2.length-1].browser_download_url], parsedBody2[parsedBody2.length-1].size, parsedBody[parsedBody.length-1].tag_name);
+              }else{
+                cb(true, downloadUrls, totalSize, parsedBody[parsedBody.length-1].tag_name);
+              }
+            }else{
+              cb(false);
+            }
+
+          }else{
+            console.log(err);
+            cb(false, null, null, null, err);
+          }
+        })
+      }else{
+        console.log(err);
+        cb(false, null, null, null, err);
+>>>>>>> 2b4934b84418ca15833538348801231e42cdb48a
       }
     })
 
   }catch (err)
   {
 
+<<<<<<< HEAD
+=======
+exports.updateGame = function updateGame(urls, size, version, cb, onProgress){
+  console.log("Updating to version: "+version)
+  let totalProgress = 0;
+  let currentItem = 0;
+  let downloadArr = function(cbDLArr){
+    console.log("Downloading: "+urls[currentItem]);
+    let currentdl = download(urls[currentItem]);
+    currentdl.pipe(unzip.Extract({ path: config.gameInstallLoc+'EverlostGame' }));
+    currentdl.on('downloadProgress', (progress)=>{
+      let progressPercent = (progress.transferred+totalProgress) / size * 100 + "%";
+      let progressPercentDisplay = ((progress.transferred+totalProgress) / size * 100).toFixed(0) + "%";
+      onProgress(progressPercent, progressPercentDisplay);
+    });
+    currentdl.on('error', (err)=>{
+      currentdl.destroy(err);
+      console.error(err);
+      cbDLArr(false, "Error");
+    });
+    currentdl.on('end', ()=>{
+      console.log("Downloaded item: "+urls[currentItem]);
+      totalProgress+=size;
+      currentItem++;
+      if(currentItem < urls.length){
+        downloadArr(complete);
+      }else{
+        cbDLArr(true, null)
+      }
+    })
+>>>>>>> 2b4934b84418ca15833538348801231e42cdb48a
   }
 }
 

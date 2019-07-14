@@ -117,6 +117,15 @@ html {
   font-size: 20px;
 }
 
+#noconn_updateserver
+{
+  text-align: center;
+  width: 100%;
+  float: left;
+  font-size: 14px;
+  color: #d87070;
+}
+
 #profile{
   width: 30%;
   height: auto;

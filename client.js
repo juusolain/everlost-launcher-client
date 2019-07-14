@@ -5,7 +5,7 @@ const request = require('request');
 const https = require('https');
 var CryptoJS = require("crypto-js");
 https.globalAgent.options.ca = require('ssl-root-cas/latest').create();
-const serverUrl = "https://everlost.jusola.cf/server/";
+const serverUrl = "https://everlost.jusola.cf/server";
 const updateFile = "";
 var token = null;
 var installLoc = "";
@@ -270,13 +270,10 @@ function setToMain(){
 }
 
 function checkUpdates(cb){
-  gameUpdater.getUpdates((avail, version)=>{
+  gameUpdater.getUpdates((avail, downloads)=>{
     if(avail){
-      setToUpdate(version);
-    }else{
-      setToNoConn_UpdateServer();
+      setToUpdate();
     }
-
   })
 
 }
@@ -330,13 +327,13 @@ function toggleLaunch(bool){
 
 
 
-function setToUpdate(version){
+function setToUpdate(){
   clearMainState();
   var updating = document.getElementById("updating");
   var updatebutton= document.getElementById("updatebutton");
   updating.style.display = "block";
   updatebutton.style.display = "block";
-  updating.textContent = "Update available: "+version;
+  updating.textContent = "Update available";
 }
 
 
@@ -344,10 +341,10 @@ function setToUpdate(version){
 
 function updatePressed(){
   clearInterval(updateInterval);
-  gameUpdater.getUpdates((isAvail, urls, size, toVersion)=>{
+  gameUpdater.getUpdates((isAvail, dlList)=>{
     if(isAvail){
-      console.log("updategame: "+toVersion)
-      updateGame(urls,size, toVersion);
+      console.log("updategame");
+      updateGame(dlList);
     }else{
       console.log("noAvail-UPDATE");
       setToMain();

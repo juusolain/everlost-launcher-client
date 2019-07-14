@@ -2,6 +2,8 @@ const request = require('request');
 const https = require('https');
 https.globalAgent.options.ca = require('ssl-root-cas/latest').create();
 const serverUrl = "https://everlost.jusola.cf/server";
+const downloadURL = "https://everlost.jusola.cf/Latest";
+const PakDir = "/Everlost/Content/Paks"
 const download = require('download');
 const fs = require('fs');
 const path = require('path');
@@ -10,6 +12,7 @@ const CryptoJS = require('crypto-js');
 const unzip = require('unzipper');
 var configContent;
 var config;
+var currentItem = 0;
 try {
   configContent = fs.readFileSync("config.json");
   config = JSON.parse(configContent);
@@ -37,24 +40,43 @@ exports.getUpdates = function getUpdates(cb){
       console.log(filearr);
       if(!err){
         request.get({url: serverUrl+path.sep+"getupdates", form: {localPAKs: JSON.stringify(filearr)}}, (err, httpResponse, body)=>{
-          console.log(body);
+          let parsedBody = JSON.parse(body);
+          let dlList = parsedBody.diffArray;
+          let ret = false;
+          if(dlList.length > 0){
+            ret = true;
+          }
+          cb(ret, dlList);
         })
       }
     })
 
   }catch (err)
   {
-
+    cb(false, null);
   }
 }
 
 
-exports.updateGame = function updateGame(cb, onProgress){
-
+exports.updateGame = function updateGame(downloadList, cb, onProgress){
+  if(downloadList.length > 0){
+    currentItem = 0;
+    downloadArrItems(()=>{
+      console.log("ArrItemsDownloaded");
+    })
+  }
 }
 
-
-
+function downloadArrItems(cb){
+  download(serverUrl+PakDir+path.sep+dlList[currentItem], config.gameInstallLoc+path.sep+"Game"+path.sep+"Everlost"+path.sep+"Content"+path.sep+"Paks").then(()=>{
+    if(currentItem < downloadList.length - 1){
+      currentItem++;
+      downloadArrItems(cb);
+    }else{
+      cb();
+    }
+  });
+}
 
 
 

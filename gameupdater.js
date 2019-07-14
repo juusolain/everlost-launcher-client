@@ -90,7 +90,7 @@ exports.updateGame = function updateGame(downloadList, isFull, cb, onProgress){
         onProgress(percent, text);
       });
     }
-  }s
+  }
 }
 
 function downloadArrItems(dlList, cb, onProgress){

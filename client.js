@@ -5,7 +5,7 @@ const request = require('request');
 const https = require('https');
 var CryptoJS = require("crypto-js");
 https.globalAgent.options.ca = require('ssl-root-cas/latest').create();
-const serverUrl = "https://everlost.jusola.cf/";
+const serverUrl = "https://everlost.jusola.cf/server/";
 const updateFile = "";
 var token = null;
 var installLoc = "";
@@ -47,7 +47,6 @@ if(config.gameInstallLoc == null || !config.platform){
 config.devServerIP = "172.23.189.190"; //Constant IP for dev server - easier testing
 const gameUpdater = require("./gameupdater.js");
 
-console.log(gameUpdater);
 window.onload = function(){
   var settingsModal = document.getElementById('settingsModal');
   settingsModal.addEventListener('animationend', function() {
@@ -271,7 +270,7 @@ function setToMain(){
 }
 
 function checkUpdates(cb){
-  gameUpdater.getUpdates((avail, urls, size, version)=>{
+  gameUpdater.getUpdates((avail, version)=>{
     if(avail){
       setToUpdate(version);
     }else{
@@ -292,9 +291,9 @@ function quitPress(){
 function launch(){
   let launchOpts;
   if(config.devServer){
-    launchOpts = [config.devServerIP+"//Game/Map/Planet/Planet?Name="+currentUserName, "-username="+currentUserName, "-token="+token];
+    launchOpts = [config.devServerIP+"//Game/Map/Planet/Planet?Name="+currentUserName, "-username="+currentUserName, "-token="+token, "-devServerIP="+config.devServerIP];
   }else{
-    launchOpts = ["mainmenu", "-username="+currentUserName, "-token="+token];
+    launchOpts = ["mainmenu", "-username="+currentUserName, "-token="+token, "-devServerIP="+config.devServerIP];
   }
   if(!gameRunning){
     toggleLaunch(false);

@@ -33,13 +33,11 @@ if(process.env.PORTABLE_EXECUTABLE_DIR){
 
 exports.getUpdates = function getUpdates(cb){
   try{
-    fs.readdir(config.gameInstallLoc+path.sep+"Game"+path.sep+"Everlost"+path.sep+"Content", (err, filearr)=>{
+    fs.readdir(config.gameInstallLoc+path.sep+"Game"+path.sep+"Everlost"+path.sep+"Content"+path.sep+"Paks", (err, filearr)=>{
       console.log(filearr);
       if(!err){
-        request.get({url: serverUrl+path.sep+"getupdates"}, (err, httpResponse, body)=>{
+        request.get({url: serverUrl+path.sep+"getupdates", form: {localPAKs: JSON.stringify(filearr)}}, (err, httpResponse, body)=>{
           console.log(body);
-          console.log(err);
-          console.log(httpResponse);
         })
       }
     })

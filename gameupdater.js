@@ -72,7 +72,7 @@ exports.getUpdates = function getUpdates(cb){
 exports.updateGame = function updateGame(downloadList, isFull, cb, onProgress){
   if(isFull){
     let dlURL = fullDownloadURL;
-    if(preRelease){
+    if(config.preRelease){
       dlURL = fullDownloadURL_PRE;
     }
     let dl = download(dlURL, config.gameInstallLoc+path.sep+"EverlostGame", {extract: true});

@@ -1,6 +1,6 @@
 const {ipcRenderer} = require('electron');
 const {dialog} = require('electron').remote;
-const {spawn, execFile} = require('child_process');
+const child_process = require('child_process');
 const request = require('request');
 const https = require('https');
 var CryptoJS = require("crypto-js");
@@ -289,23 +289,26 @@ function launch(){
     launchOpts = ["mainmenu", "-username="+currentUserName, "-token="+token, "-devServerIP="+config.devServerIP];
   }
   if(!gameRunning){
+    console.log("!gameRunning");
     toggleLaunch(false);
-    gameRunning = true;
-    checkUpdates((updateNeeded)=>{
-      if(!updateNeeded){
-        toggleLaunch(false);
+    gameRunning = false;
+    //checkUpdates((updateNeeded)=>{
+      //if(!updateNeeded){
         gameRunning = true;
-        const game = execFile(config.gameInstallLoc+"EverlostGame"+path.sep+"Everlost.exe", launchOpts, {detached: true});
+        const game = child_process.execFile(config.gameInstallLoc+"EverlostGame"+path.sep+"Everlost.exe", launchOpts, {detached: true}, (err)=>{
+          console.log(err);
+        });
+        console.log(game);
         game.on("close", ()=>{
           gameRunning = false;
           toggleLaunch(true);
           console.log("Game closed");
         });
-      }else{
-        gameRunning = false;
-        toggleLaunch(true);
-      }
-    })
+      //}else{
+        //gameRunning = false;
+        //toggleLaunch(true);
+      //}
+    //})
   }
 
 

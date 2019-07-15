@@ -397,9 +397,11 @@ function gameIsUpdated(bUpdated, version){
 function openSettings(){
   var settingsModal = document.getElementById('settingsModal');
   var gameinstall = document.getElementById('settings-installloc');
+  var settingsPreRelease = document.getElementById('settingsPreRelease');
   if(settingsModal.classList.contains('fadedout')){
     settingsModal.classList.remove('fadedout');
   }
+  settingsPreRelease.checked = config.preRelease;
   settingsModal.style.display = "block";
   gameinstall.textContent = config.gameInstallLoc;
 }
@@ -415,6 +417,11 @@ window.onclick = function(event) {
   }
 }
 
+function togglePreRelease(){
+  config.preRelease = settingsPreRelease.checked;
+  saveSettings();
+}
+
 function closeSettings(){
   var settingsModal = document.getElementById('settingsModal');
   settingsModal.classList.add('fadedout');
@@ -423,7 +430,7 @@ function closeSettings(){
 function saveSettings(){
   fs.writeFile("config.json", JSON.stringify(config),(err)=>{
     if(err) console.log(err);
-    checkForUpdates();
+    checkUpdates();
   })
 }
 function saveSettingsSync(){

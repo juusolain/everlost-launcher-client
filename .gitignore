@@ -2,7 +2,7 @@ dist/
 node_modules/
 package-lock.json
 yarn.lock
-Game/
+EverlostGame/
 Download/
 config.json
 cache/*

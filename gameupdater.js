@@ -2,8 +2,10 @@ const request = require('request');
 const https = require('https');
 https.globalAgent.options.ca = require('ssl-root-cas/latest').create();
 const serverUrl = "https://everlost.jusola.cf/server/";
-const downloadURL = "https://everlost.jusola.cf/Latest";
+const downloadURL = "https://everlost.jusola.cf/Latest/WindowsNoEditor";
+const downloadURL_PRE = "https://everlost.jusola.cf/Latest-Pre/WindowsNoEditor";
 const fullDownloadURL = "https://everlost.jusola.cf/Latest.zip";
+const fullDownloadURL_PRE = "https://everlost.jusola.cf/Latest-Pre.zip";
 const PakDir = "/Everlost/Content/Paks"
 const download = require('download');
 const fs = require('fs');
@@ -42,7 +44,7 @@ exports.getUpdates = function getUpdates(cb){
     fs.readdir(config.gameInstallLoc+path.sep+"EverlostGame"+path.sep+"Everlost"+path.sep+"Content"+path.sep+"Paks", (err, filearr)=>{
         console.log(filearr);
         if(!err){
-          request.get({url: serverUrl+"getupdates", form: {localPAKs: JSON.stringify(filearr)}}, (err, httpResponse, body)=>{
+          request.get({url: serverUrl+"getupdates", form: {localPAKs: JSON.stringify(filearr), preRelease: config.preRelease}}, (err, httpResponse, body)=>{
             let parsedBody = JSON.parse(body);
             dlList = parsedBody.diffArray;
             ret = false;
@@ -69,7 +71,11 @@ exports.getUpdates = function getUpdates(cb){
 
 exports.updateGame = function updateGame(downloadList, isFull, cb, onProgress){
   if(isFull){
-    let dl = download(fullDownloadURL, config.gameInstallLoc+path.sep+"EverlostGame", {extract: true});
+    let dlURL = fullDownloadURL;
+    if(preRelease){
+      dlURL = fullDownloadURL_PRE;
+    }
+    let dl = download(dlURL, config.gameInstallLoc+path.sep+"EverlostGame", {extract: true});
     dl.on('error', (err)=>{
       console.log(err);
     })
@@ -94,8 +100,12 @@ exports.updateGame = function updateGame(downloadList, isFull, cb, onProgress){
 }
 
 function downloadArrItems(dlList, cb, onProgress){
-  console.log(downloadURL+PakDir+path.sep+dlList[currentItem]);
-  var dl = download(downloadURL+PakDir+path.sep+dlList[currentItem], config.gameInstallLoc+path.sep+"EverlostGame"+path.sep+"Everlost"+path.sep+"Content"+path.sep+"Paks");
+  let dlURL = downloadURL;
+  if(config.preRelease){
+    dlURL = downloadURL_PRE;
+  }
+  console.log(dlURL+PakDir+path.sep+dlList[currentItem]);
+  var dl = download(dlURL+PakDir+path.sep+dlList[currentItem], config.gameInstallLoc+path.sep+"EverlostGame"+path.sep+"Everlost"+path.sep+"Content"+path.sep+"Paks");
   dl.on('error', (err)=>{
     console.log(err);
   })

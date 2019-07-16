@@ -385,8 +385,7 @@ function gameIsUpdated(bUpdated, version){
   var versionDisplay = document.getElementById("version");
   if(bUpdated){
     versionDisplay.textContent = "Game: "+version;
-  }
-  if(bUpdated){
+    gameUpdater.hashGame();
   }
 
 }

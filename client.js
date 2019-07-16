@@ -47,6 +47,8 @@ if(config.gameInstallLoc == null || !config.platform){
 config.devServerIP = "172.23.189.190"; //Constant IP for dev server - easier testing
 const gameUpdater = require("./gameupdater.js");
 
+
+
 window.onload = function(){
   var settingsModal = document.getElementById('settingsModal');
   settingsModal.addEventListener('animationend', function() {
@@ -266,7 +268,7 @@ function setToMain(){
 }
 
 function checkUpdates(cb){
-  gameUpdater.getUpdates((avail, downloads, isFull)=>{
+  gameUpdater.getUpdates((avail, downloads)=>{
     if(avail){
       setToUpdate();
     }else{
@@ -342,7 +344,7 @@ function setToUpdate(){
 
 function updatePressed(){
   clearInterval(updateInterval);
-  gameUpdater.getUpdates((isAvail, dlList, needsFull)=>{
+  gameUpdater.getUpdates((isAvail, dlList)=>{
     if(isAvail){
       clearMainState();
       var updateButton = document.getElementById("updatebutton");
@@ -360,7 +362,7 @@ function updatePressed(){
       console.log(version);
       updating.textContent = "Updating";
       console.log("updategame");
-      gameUpdater.updateGame(dlList, needsFull, ()=>{
+      gameUpdater.updateGame(dlList, ()=>{
         gameIsUpdated(true, null);
       }, (uprogress, uprogressdisp)=>{
           updatebar.style.width = uprogress*100+"%";
@@ -456,6 +458,7 @@ function installLocChanged(){
   console.log(config.gameInstallLoc);
   var gameinstall = document.getElementById('settings-installloc');
   gameinstall.textContent = config.gameInstallLoc;
+  gameUpdater.hashGame();
   saveSettings();
 }
 
@@ -482,4 +485,6 @@ function clearMainState(){
   loadingBar.style.display = "none";
   updatebutton.style.display = "none";
   noconnError.style.display = "none";
+
 }
+gameUpdater.hashGame();

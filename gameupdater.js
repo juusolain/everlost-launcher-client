@@ -6,7 +6,6 @@ const downloadURL = "https://everlost.jusola.cf/Latest/WindowsNoEditor";
 const downloadURL_PRE = "https://everlost.jusola.cf/Latest-Pre/WindowsNoEditor";
 const fullDownloadURL = "https://everlost.jusola.cf/Latest.zip";
 const fullDownloadURL_PRE = "https://everlost.jusola.cf/Latest-Pre.zip";
-const PakDir = "/Everlost/Content/Paks"
 const download = require('download');
 const fs = require('fs');
 const path = require('path');
@@ -44,55 +43,44 @@ exports.hashGame = function hashGame(){
 
 
 exports.getUpdates = function getUpdates(cb){
-  let dlList;
+  let dlList = {};
   let ret;
   try{
       request.get({url: serverUrl+"getupdates", form: {preRelease: config.preRelease}}, (err, httpResponse, body)=>{
         let parsedBody = JSON.parse(body);
+        console.log(body);
+        console.log(parsedBody);
         let remoteSums = new Map(JSON.parse(parsedBody.serverChecksums));
         let remoteFiles = Array.from( remoteSums.keys() );
         let localFiles = Array.from( checksums.keys() );
-        dlList.add(diffArrays(remoteFiles, localFiles));
-
-
-            /*
-            dlList = parsedBody.diffArray;
-            ret = false;
-            if(dlList.length > 0){
-              ret = true;
-            }else{
-              ret = false;
-            }
-            cb(ret, dlList, false);*/
+        dlList = diffArrays(remoteFiles, localFiles);
+        let matches = matchArrays(remoteFiles, localFiles);
+        matches.forEach((elem)=>{
+          let remoteSum = remoteSums.get(elem);
+          let localSum = checksums.get(elem);
+          if(remoteSum !== localSum){
+            console.log("Mismatching file: "+elem+", CHKsums: Server: "+remoteSum+", local: "+localSum );
+            dlList.add(elem);
+          }
+        })
+        ret = false;
+        if(dlList.length > 0){
+          ret = true;
+        }else{
+          ret = false;
+        }
+        cb(ret, dlList);
         })
   }
   catch(err){
     console.log(err);
-    cb(true, null, true);
   }
 
 }
 
 
-exports.updateGame = function updateGame(downloadList, isFull, cb, onProgress){
-  if(isFull){
-    let dlURL = fullDownloadURL;
-    if(config.preRelease){
-      dlURL = fullDownloadURL_PRE;
-    }
-    let dl = download(dlURL, config.gameInstallLoc+path.sep+"EverlostGame", {extract: true});
-    dl.on('error', (err)=>{
-      console.log(err);
-    })
-    dl.on('end', ()=>{
-      console.log("finished");
-      cb();
-    })
-    dl.on('downloadProgress', (progress)=>{
-      onProgress(progress.percent, "1"+"/"+"1");
-    });
-  }else{
-    if(downloadList.length > 0){
+exports.updateGame = function updateGame(downloadList, cb, onProgress){
+  if(downloadList.length > 0){
       currentItem = 0;
       downloadArrItems(downloadList, ()=>{
         console.log("ArrItemsDownloaded");
@@ -101,7 +89,6 @@ exports.updateGame = function updateGame(downloadList, isFull, cb, onProgress){
         onProgress(percent, text);
       });
     }
-  }
 }
 
 function downloadArrItems(dlList, cb, onProgress){
@@ -109,10 +96,16 @@ function downloadArrItems(dlList, cb, onProgress){
   if(config.preRelease){
     dlURL = downloadURL_PRE;
   }
-  console.log(dlURL+PakDir+path.sep+dlList[currentItem]);
-  var dl = download(dlURL+PakDir+path.sep+dlList[currentItem], config.gameInstallLoc+path.sep+"EverlostGame"+path.sep+"Everlost"+path.sep+"Content"+path.sep+"Paks");
+  console.log(dlURL+path.sep+dlList[currentItem]);
+  var dl = download(dlURL+path.sep+dlList[currentItem], config.gameInstallLoc+path.sep+"EverlostGame"+path.sep+"Everlost"+path.sep+"Content"+path.sep+"Paks");
   dl.on('error', (err)=>{
     console.log(err);
+    if(currentItem < dlList.length - 1){
+      currentItem++;
+      downloadArrItems(dlList, cb, onProgress);
+    }else{
+      cb();
+    }
   })
   dl.on('end', ()=>{
     console.log("finished");
@@ -160,22 +153,27 @@ function getKeyForValue(object, value) {
 }
 
 function hashDir(dir) {
-  fs.readdirSync(dir).forEach(file => {
-    let fullPath = path.join(dir, file);
-    let filePath = fullPath.split("EverlostGame"+path.sep, 1)[1];
-    if (fs.lstatSync(fullPath).isDirectory()) {
-       console.log(filePath);
-       hashDir(fullPath, isPre);
-     } else {
-       sha1Sum(fullPath).then((sum)=>{
-         console.log("hashing: "+fullPath+": "+sum);
-       checksums.set(filepath, sum);
-       }).catch((err)=>{
-         console.log(err);
-       })
-       console.log(filePath);
-     }
-  });
+  try{
+    fs.readdirSync(dir).forEach(file => {
+      let fullPath = path.join(dir, file);
+      let filePath = fullPath.split("EverlostGame"+path.sep, 1)[1];
+      if (fs.lstatSync(fullPath).isDirectory()) {
+         console.log(filePath);
+         hashDir(fullPath, isPre);
+       } else {
+         sha1Sum(fullPath).then((sum)=>{
+           console.log("hashing: "+fullPath+": "+sum);
+         checksums.set(filepath, sum);
+         }).catch((err)=>{
+           console.log(err);
+         })
+         console.log(filePath);
+       }
+    });
+  }catch(err) {
+    console.log(err);
+  }
+
 }
 
 function diffArrays(arr1, arr2) {

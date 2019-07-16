@@ -15,6 +15,7 @@ const CryptoJS = require('crypto-js');
 const unzip = require('unzipper');
 var configContent;
 var config;
+var checksums = new Map();
 var currentItem = 0;
 try {
   configContent = fs.readFileSync("config.json");
@@ -37,15 +38,24 @@ if(process.env.PORTABLE_EXECUTABLE_DIR){
   rootdir = __dirname;
 }
 
+exports.hashGame = function hashGame(){
+  hashDir(config.gameInstallLoc+"EverlostGame/");
+}
+
+
 exports.getUpdates = function getUpdates(cb){
   let dlList;
   let ret;
   try{
-    fs.readdir(config.gameInstallLoc+path.sep+"EverlostGame"+path.sep+"Everlost"+path.sep+"Content"+path.sep+"Paks", (err, filearr)=>{
-        console.log(filearr);
-        if(!err){
-          request.get({url: serverUrl+"getupdates", form: {localPAKs: JSON.stringify(filearr), preRelease: config.preRelease}}, (err, httpResponse, body)=>{
-            let parsedBody = JSON.parse(body);
+      request.get({url: serverUrl+"getupdates", form: {preRelease: config.preRelease}}, (err, httpResponse, body)=>{
+        let parsedBody = JSON.parse(body);
+        let remoteSums = new Map(JSON.parse(parsedBody.serverChecksums));
+        let remoteFiles = Array.from( remoteSums.keys() );
+        let localFiles = Array.from( checksums.keys() );
+        dlList.add(diffArrays(remoteFiles, localFiles));
+
+
+            /*
             dlList = parsedBody.diffArray;
             ret = false;
             if(dlList.length > 0){
@@ -53,13 +63,8 @@ exports.getUpdates = function getUpdates(cb){
             }else{
               ret = false;
             }
-            cb(ret, dlList, false);
-          })
-        }else{
-          console.log(err);
-          cb(true, null, true);
-        }
-      })
+            cb(ret, dlList, false);*/
+        })
   }
   catch(err){
     console.log(err);
@@ -152,4 +157,43 @@ function getKeyForValue(object, value) {
      return object[key] == value;
   });
   return key;
+}
+
+function hashDir(dir) {
+  fs.readdirSync(dir).forEach(file => {
+    let fullPath = path.join(dir, file);
+    let filePath = fullPath.split("EverlostGame"+path.sep, 1)[1];
+    if (fs.lstatSync(fullPath).isDirectory()) {
+       console.log(filePath);
+       hashDir(fullPath, isPre);
+     } else {
+       sha1Sum(fullPath).then((sum)=>{
+         console.log("hashing: "+fullPath+": "+sum);
+       checksums.set(filepath, sum);
+       }).catch((err)=>{
+         console.log(err);
+       })
+       console.log(filePath);
+     }
+  });
+}
+
+function diffArrays(arr1, arr2) {
+ var newArr = [];
+
+  arr1.forEach(function(val){
+   if(arr2.indexOf(val) < 0) newArr.push(val);
+  });
+
+  return newArr;
+}
+
+function matchArrays(arr1, arr2){
+  var newArr = [];
+
+   arr1.forEach(function(val){
+    if(arr2.indexOf(val) >= 0) newArr.push(val);
+   });
+
+   return newArr;
 }

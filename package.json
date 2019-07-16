@@ -30,6 +30,7 @@
     "md5-file": "^4.0.0",
     "node-stream-zip": "^1.7.0",
     "request": "^2.88.0",
+    "sha1-sum": "^1.0.0",
     "ssl-root-cas": "^1.2.5",
     "unzipper": "^0.9.7"
   },

@@ -1,11 +1,9 @@
 const request = require('request');
 const https = require('https');
 https.globalAgent.options.ca = require('ssl-root-cas/latest').create();
-const serverUrl = "https://everlost.jusola.tk/server/";
-const downloadURL = "https://everlost.jusola.tk/Latest/WindowsNoEditor";
-const downloadURL_PRE = "https://everlost.jusola.tk/Latest-Pre/WindowsNoEditor";
-const fullDownloadURL = "https://everlost.jusola.tk/Latest.zip";
-const fullDownloadURL_PRE = "https://everlost.jusola.tk/Latest-Pre.zip";
+const serverUrl = "https://everlost.jusola.tk:5001/server/";
+const downloadURL = "https://everlost.jusola.tk:5001/latest/WindowsNoEditor";
+const downloadURL_PRE = "https://everlost.jusola.tk:5001/preRelease/WindowsNoEditor";
 const download = require('download');
 const fs = require('fs');
 const sha1Sum = require('sha1-sum')
@@ -81,8 +79,6 @@ exports.getUpdates = function getUpdates(cb){
   }else{
     setTimeout(getUpdates, 5000, cb);
   }
-
-
 }
 
 

@@ -14,7 +14,7 @@
   "repository": "https://github.com/jusola/everlost-launcher-client.git",
   "license": "SEE LICENSE IN ../../EULA.txt",
   "devDependencies": {
-    "electron": "^3.0.10",
+    "electron": "^9.1.0",
     "electron-builder": "^20.40.2"
   },
   "dependencies": {
